@@ -1,0 +1,27 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "unsprayed_annex",
+        "description": "10m wide strip east of spray grid, no herbicide dye applied",
+        "offset_from_grid_m": 5,
+        "width_m": 10,
+        "ns_span_m": 118.4
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [-114.0384199681, 46.7050887544],
+            [-114.0382893265, 46.7050853702],
+            [-114.0382310770, 46.7061494661],
+            [-114.0383617212, 46.7061528504],
+            [-114.0384199681, 46.7050887544]
+          ]
+        ]
+      }
+    }
+  ]
+}

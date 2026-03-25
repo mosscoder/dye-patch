@@ -1,0 +1,28 @@
+[project]
+name = "dye-patch"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.0",
+    "torchvision>=0.15",
+    "transformers",
+    "datasets",
+    "huggingface-hub",
+    "python-dotenv",
+    "numpy",
+    "pandas",
+    "Pillow",
+    "scikit-learn",
+    "scipy",
+    "optuna",
+    "rasterio",
+    "pyproj",
+    "matplotlib",
+]
+
+[tool.setuptools.packages.find]
+include = ["patch*"]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

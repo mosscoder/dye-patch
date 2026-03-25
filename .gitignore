@@ -1,0 +1,14 @@
+data/images/*
+
+__pycache__/
+*.egg-info/
+.DS_Store
+
+.env
+.claude/*
+.vscode/*
+
+segmentation/refactor_instructions.md
+literature/*
+
+manuscripts/prior_versions/*
