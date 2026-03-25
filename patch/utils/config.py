@@ -67,9 +67,8 @@ WEIGHT_DECAY = 0.01
 CONFIGS = ["real_only", "hybrid", "synth_local", "synth_offsite"]
 SYNTH_CONFIGS = ["hybrid", "synth_local", "synth_offsite"]
 
-# Tuning subsampling
-TUNING_TRAIN_SAMPLES = 128
-TUNING_VAL_SAMPLES = 128
+# Tuning subsampling (points, not tiles — each point has 3 monthly tiles)
+TUNING_POINTS_PER_SET = 40
 TUNING_TEST_FRAC = 0.3  # 70/30 train/test
 
 # Eval

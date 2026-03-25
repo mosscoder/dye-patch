@@ -9,6 +9,7 @@ import random
 import numpy as np
 import torch
 import torch.nn as nn
+from tqdm import tqdm
 
 from patch.utils.config import EVAL_CROP_OFFSET, WEIGHT_DECAY
 from patch.utils.dataset import generate_patch_labels
@@ -104,7 +105,7 @@ class PatchTrainer:
         correct = 0
         total = 0
 
-        for images, masks, _ in loader:
+        for images, masks, _ in tqdm(loader, desc="  train", leave=False):
             images = images.to(self.device)
             masks = masks.to(self.device).long()
 
@@ -139,7 +140,7 @@ class PatchTrainer:
         all_labels = []
         all_metadata = []
 
-        for images, masks, metadata in loader:
+        for images, masks, metadata in tqdm(loader, desc="  val", leave=False):
             images = images.to(self.device)
             masks = masks.to(self.device).long()
 

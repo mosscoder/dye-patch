@@ -23,9 +23,8 @@ from patch.utils.config import (
     MODEL_INPUT_SIZE,
     MONTHS,
     PRECROP_SIZE,
+    TUNING_POINTS_PER_SET,
     TUNING_TEST_FRAC,
-    TUNING_TRAIN_SAMPLES,
-    TUNING_VAL_SAMPLES,
     VIT_PATCH_SIZE,
 )
 from patch.utils.augmentations import (
@@ -254,7 +253,8 @@ def temporal_holdout_split(hf_dataset, holdout_month: str):
 def tuning_split(train_dataset, seed: int = 0):
     """Split train set into tuning-train and tuning-val at the POINT level.
 
-    Targets ~128 tiles per set (~43 points × 3 months each).
+    Randomly samples TUNING_POINTS_PER_SET points for train and the same
+    count for val (40 points × 3 months = 120 tiles per set by default).
     All months of a point stay in the same set.
     Falls back to random (non-stratified) split when all points share a
     single stratum (e.g., offsite or annex tiles with no color/size variation).
@@ -266,7 +266,8 @@ def tuning_split(train_dataset, seed: int = 0):
     strata = [point_strata[p] for p in points]
     can_stratify = len(set(strata)) > 1
 
-    n_points_needed = (TUNING_TRAIN_SAMPLES + TUNING_VAL_SAMPLES) // max(1, len(train_dataset) // len(points)) if points else 0
+    n_per_set = min(TUNING_POINTS_PER_SET, len(points) // 2)
+    n_points_needed = n_per_set * 2
     n_points_needed = min(n_points_needed, len(points))
 
     # Subsample points if we have more than needed
@@ -279,10 +280,9 @@ def tuning_split(train_dataset, seed: int = 0):
         strata = [point_strata[p] for p in points]
         can_stratify = len(set(strata)) > 1
 
-    # Split selected points into train/val halves
-    n_train_points = len(points) // 2
+    # Split selected points into equal train/val sets
     train_points, val_points = train_test_split(
-        points, train_size=n_train_points,
+        points, train_size=n_per_set,
         stratify=strata if can_stratify else None,
         random_state=seed + 1,
     )
