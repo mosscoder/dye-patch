@@ -1,7 +1,6 @@
 """Minimal test: can we load cached HF datasets and model on a compute node?"""
 
 import os
-import subprocess
 
 from patch.utils.config import MODEL_NAME
 
@@ -24,62 +23,101 @@ def print_env():
 def inspect_cache():
     hf_home = os.environ.get("HF_HOME", "")
     if not hf_home:
-        print("  HF_HOME not set, skipping cache inspection")
+        print("  HF_HOME not set, skipping")
         return
 
-    # Check hub cache (where dataset metadata lives)
+    # Inspect dye_patch hub cache (2 levels deep)
     hub_ds = os.path.join(hf_home, "hub", "datasets--mpg-ranch--dye_patch")
-    print(f"\n  Hub cache: {hub_ds}")
-    print(f"    exists: {os.path.isdir(hub_ds)}")
-    refs = os.path.join(hub_ds, "refs")
-    if os.path.isdir(refs):
-        for f in os.listdir(refs):
-            content = open(os.path.join(refs, f)).read().strip()
-            print(f"    refs/{f}: {content}")
-    snapshots = os.path.join(hub_ds, "snapshots")
-    if os.path.isdir(snapshots):
-        for d in os.listdir(snapshots):
-            files = os.listdir(os.path.join(snapshots, d))
-            print(f"    snapshots/{d[:12]}...: {files}")
+    print(f"\n--- dye_patch hub cache ---")
+    print(f"  {hub_ds} exists: {os.path.isdir(hub_ds)}")
 
-    # Check datasets cache
-    ds_cache = os.path.join(hf_home, "datasets")
-    print(f"\n  Datasets cache: {ds_cache}")
-    print(f"    exists: {os.path.isdir(ds_cache)}")
-    if os.path.isdir(ds_cache):
-        entries = [e for e in os.listdir(ds_cache) if "dye" in e.lower() or "mpg" in e.lower()]
-        for e in entries[:5]:
-            print(f"    {e}")
+    # Find the snapshot dir
+    snapshots_dir = os.path.join(hub_ds, "snapshots")
+    if os.path.isdir(snapshots_dir):
+        for snap in os.listdir(snapshots_dir):
+            snap_path = os.path.join(snapshots_dir, snap)
+            print(f"\n  snapshot/{snap[:12]}...:")
+            for entry in sorted(os.listdir(snap_path)):
+                entry_path = os.path.join(snap_path, entry)
+                if os.path.isdir(entry_path):
+                    children = sorted(os.listdir(entry_path))
+                    # Show file sizes for first few
+                    details = []
+                    for c in children[:5]:
+                        cp = os.path.join(entry_path, c)
+                        sz = os.path.getsize(cp) if os.path.isfile(cp) else "dir"
+                        details.append(f"{c} ({sz})")
+                    print(f"    {entry}/ [{len(children)} files]: {details}")
+                else:
+                    sz = os.path.getsize(entry_path)
+                    print(f"    {entry} ({sz} bytes)")
+
+    # Compare with wolverines cache
+    wol_ds = os.path.join(hf_home, "hub", "datasets--kdoherty--wolverines")
+    print(f"\n--- wolverines hub cache (for comparison) ---")
+    print(f"  {wol_ds} exists: {os.path.isdir(wol_ds)}")
+    wol_snaps = os.path.join(wol_ds, "snapshots")
+    if os.path.isdir(wol_snaps):
+        for snap in os.listdir(wol_snaps):
+            snap_path = os.path.join(wol_snaps, snap)
+            entries = sorted(os.listdir(snap_path))
+            print(f"  snapshot/{snap[:12]}...: {entries[:10]}")
+            # Show first config dir if it exists
+            for entry in entries[:3]:
+                ep = os.path.join(snap_path, entry)
+                if os.path.isdir(ep):
+                    children = sorted(os.listdir(ep))[:5]
+                    details = []
+                    for c in children:
+                        cp = os.path.join(ep, c)
+                        sz = os.path.getsize(cp) if os.path.isfile(cp) else "dir"
+                        details.append(f"{c} ({sz})")
+                    print(f"    {entry}/ : {details}")
 
 
-def test_with_offline_flag():
-    """Test 1: load with HF_DATASETS_OFFLINE=1 (current sbatch setup)."""
-    print("\n--- Test 1: HF_DATASETS_OFFLINE=1 ---")
-    os.environ["HF_DATASETS_OFFLINE"] = "1"
+def test_load():
+    """Try loading sprayed/train with various approaches."""
     from datasets import load_dataset
 
+    # Test 1: offline flag set
+    print("\n--- Test 1: HF_DATASETS_OFFLINE=1 ---")
+    os.environ["HF_DATASETS_OFFLINE"] = "1"
     try:
         ds = load_dataset(HF_REPO, TEST_CONFIG, split=TEST_SPLIT)
         print(f"  OK   {len(ds)} rows")
     except Exception as e:
         print(f"  FAIL {type(e).__name__}: {e}")
 
-
-def test_without_offline_flag():
-    """Test 2: load WITHOUT offline flag (let Hub access fail naturally)."""
+    # Test 2: offline flag unset
     print("\n--- Test 2: HF_DATASETS_OFFLINE unset ---")
     os.environ.pop("HF_DATASETS_OFFLINE", None)
     os.environ.pop("HF_HUB_OFFLINE", None)
-
-    # Need fresh import to pick up env change
-    import importlib
-    import datasets.config
-    importlib.reload(datasets.config)
-
-    from datasets import load_dataset
-
     try:
         ds = load_dataset(HF_REPO, TEST_CONFIG, split=TEST_SPLIT)
+        print(f"  OK   {len(ds)} rows")
+    except Exception as e:
+        print(f"  FAIL {type(e).__name__}: {e}")
+
+    # Test 3: load with explicit data_dir pointing to snapshot
+    print("\n--- Test 3: explicit data_dir from snapshot ---")
+    hf_home = os.environ.get("HF_HOME", "")
+    snap_dir = os.path.join(hf_home, "hub", "datasets--mpg-ranch--dye_patch", "snapshots")
+    if os.path.isdir(snap_dir):
+        snaps = os.listdir(snap_dir)
+        if snaps:
+            data_dir = os.path.join(snap_dir, snaps[0])
+            print(f"  data_dir={data_dir}")
+            try:
+                ds = load_dataset(HF_REPO, TEST_CONFIG, split=TEST_SPLIT, data_dir=data_dir)
+                print(f"  OK   {len(ds)} rows")
+            except Exception as e:
+                print(f"  FAIL {type(e).__name__}: {e}")
+
+    # Test 4: load wolverines for comparison
+    print("\n--- Test 4: wolverines (known working) ---")
+    os.environ["HF_DATASETS_OFFLINE"] = "1"
+    try:
+        ds = load_dataset("kdoherty/wolverines", "reidentification", split="train")
         print(f"  OK   {len(ds)} rows")
     except Exception as e:
         print(f"  FAIL {type(e).__name__}: {e}")
@@ -99,10 +137,6 @@ def test_model():
 
 if __name__ == "__main__":
     print_env()
-
-    print("\n--- Cache Inspection ---")
     inspect_cache()
-
-    test_with_offline_flag()
-    test_without_offline_flag()
+    test_load()
     test_model()
