@@ -7,7 +7,6 @@
 #SBATCH --mem=32G
 #SBATCH --gres=gpu:1
 #SBATCH --time=4:00:00
-#SBATCH --exclude=babel-l5-[16,20,24],babel-y5-16,babel-x9-24
 #SBATCH --output=/home/kdoherty/logs/dye_patch/eval/data_source/%A_%a.out
 #SBATCH --error=/home/kdoherty/logs/dye_patch/eval/data_source/%A_%a.err
 
