@@ -47,9 +47,12 @@ def cache_datasets():
                 disk_path = os.path.join(disk_root, config, split)
                 ds.save_to_disk(disk_path)
                 print(f"  {config}/{split}: {len(ds)} rows → {disk_path}")
-            except Exception:
+            except ValueError:
                 # Some configs only have "train" split
                 pass
+            except Exception as e:
+                print(f"  ERROR {config}/{split}: {type(e).__name__}: {e}")
+                raise
     print("  Datasets cached.")
 
 
