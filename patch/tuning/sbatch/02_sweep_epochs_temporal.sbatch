@@ -18,7 +18,6 @@ source ~/.bashrc
 mamba activate dye_patch
 
 export HF_HOME=/data/hf_cache
-export HF_DATASETS_CACHE=/data/hf_cache
 export HF_DATASETS_OFFLINE=1
 export TMPDIR=/scratch/kdoherty && mkdir -p $TMPDIR
 

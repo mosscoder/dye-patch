@@ -1,14 +1,16 @@
 """Minimal test: can we load cached HF datasets and model on a compute node?"""
 
 import os
-import subprocess
-import sys
 
 from patch.utils.config import MODEL_NAME
+from patch.utils.dataset import load_hf_dataset
 
-HF_REPO = "mpg-ranch/dye_patch"
-TEST_CONFIG = "sprayed"
-TEST_SPLIT = "train"
+CONFIGS_SPLITS = [
+    ("sprayed", "train"),
+    ("sprayed", "test"),
+    ("unsprayed_annex", "train"),
+    ("offsite", "train"),
+]
 
 
 def print_env():
@@ -16,107 +18,29 @@ def print_env():
     import huggingface_hub
 
     print(f"HF_HOME={os.environ.get('HF_HOME', '(not set)')}")
-    print(f"HF_DATASETS_OFFLINE={os.environ.get('HF_DATASETS_OFFLINE', '(not set)')}")
     print(f"datasets=={datasets.__version__}")
     print(f"huggingface_hub=={huggingface_hub.__version__}")
 
 
-def inspect_cache():
+def test_datasets():
+    print("\n--- Datasets ---")
     hf_home = os.environ.get("HF_HOME", "")
+    disk_root = os.path.join(hf_home, "dye_patch") if hf_home else ""
+    print(f"  Disk cache root: {disk_root}")
+    print(f"  Exists: {os.path.isdir(disk_root)}")
+    if os.path.isdir(disk_root):
+        for d in sorted(os.listdir(disk_root)):
+            dp = os.path.join(disk_root, d)
+            if os.path.isdir(dp):
+                children = sorted(os.listdir(dp))
+                print(f"    {d}/ : {children}")
 
-    # What's in the datasets processed cache?
-    ds_cache = os.path.join(hf_home, "datasets")
-    print(f"\n--- Processed cache: {ds_cache} ---")
-    if os.path.isdir(ds_cache):
-        entries = sorted(os.listdir(ds_cache))
-        for e in entries:
-            ep = os.path.join(ds_cache, e)
-            if os.path.isdir(ep):
-                children = sorted(os.listdir(ep))[:5]
-                print(f"  {e}/ : {children}")
-            else:
-                print(f"  {e} ({os.path.getsize(ep)} bytes)")
-    else:
-        print("  DOES NOT EXIST")
-
-    # What does wolverines processed cache look like?
-    print(f"\n--- Wolverines processed cache (for comparison) ---")
-    if os.path.isdir(ds_cache):
-        wol = [e for e in os.listdir(ds_cache) if "wolverine" in e.lower()]
-        for e in wol:
-            ep = os.path.join(ds_cache, e)
-            if os.path.isdir(ep):
-                children = sorted(os.listdir(ep))[:5]
-                print(f"  {e}/ : {children}")
-
-
-def test_in_subprocess(label, env_overrides, load_code):
-    """Run a load_dataset test in a fresh subprocess to avoid cached env vars."""
-    env = os.environ.copy()
-    env.update(env_overrides)
-    # Remove keys set to None
-    for k, v in list(env.items()):
-        if v is None:
-            del env[k]
-
-    code = f"""
-import sys
-try:
-    {load_code}
-    print("OK " + str(len(ds)) + " rows")
-except Exception as e:
-    print(f"FAIL {{type(e).__name__}}: {{e}}")
-"""
-    result = subprocess.run(
-        [sys.executable, "-c", code],
-        env=env, capture_output=True, text=True, timeout=60,
-    )
-    output = (result.stdout + result.stderr).strip().split("\n")[-1]
-    print(f"  {label}: {output}")
-
-
-def test_load():
-    hf_home = os.environ.get("HF_HOME", "")
-
-    # Test 1: offline flag (current sbatch setup)
-    test_in_subprocess(
-        "HF_DATASETS_OFFLINE=1",
-        {"HF_DATASETS_OFFLINE": "1"},
-        f'from datasets import load_dataset; ds = load_dataset("{HF_REPO}", "{TEST_CONFIG}", split="{TEST_SPLIT}")',
-    )
-
-    # Test 2: no offline flag (fresh subprocess, clean env)
-    env2 = {}
-    if "HF_DATASETS_OFFLINE" in os.environ:
-        env2["HF_DATASETS_OFFLINE"] = None  # signals removal
-    if "HF_HUB_OFFLINE" in os.environ:
-        env2["HF_HUB_OFFLINE"] = None
-    # Build clean env for subprocess
-    clean_env = os.environ.copy()
-    clean_env.pop("HF_DATASETS_OFFLINE", None)
-    clean_env.pop("HF_HUB_OFFLINE", None)
-    code2 = f"""
-import sys
-try:
-    from datasets import load_dataset
-    ds = load_dataset("{HF_REPO}", "{TEST_CONFIG}", split="{TEST_SPLIT}")
-    print("OK " + str(len(ds)) + " rows")
-except Exception as e:
-    print(f"FAIL {{type(e).__name__}}: {{e}}")
-"""
-    result = subprocess.run(
-        [sys.executable, "-c", code2],
-        env=clean_env, capture_output=True, text=True, timeout=120,
-    )
-    output = (result.stdout + result.stderr).strip().split("\n")[-1]
-    print(f"  No offline flags: {output}")
-
-    # Test 3: wolverines with offline flag
-    test_in_subprocess(
-        "wolverines/pelage offline",
-        {"HF_DATASETS_OFFLINE": "1"},
-        'from datasets import load_dataset; ds = load_dataset("kdoherty/wolverines", "pelage", split="train")',
-    )
+    for config, split in CONFIGS_SPLITS:
+        try:
+            ds = load_hf_dataset(config, split)
+            print(f"  OK   {config}/{split}: {len(ds)} rows")
+        except Exception as e:
+            print(f"  FAIL {config}/{split}: {type(e).__name__}: {e}")
 
 
 def test_model():
@@ -133,8 +57,5 @@ def test_model():
 
 if __name__ == "__main__":
     print_env()
-    inspect_cache()
-
-    print("\n--- Load tests (subprocesses for clean env) ---")
-    test_load()
+    test_datasets()
     test_model()

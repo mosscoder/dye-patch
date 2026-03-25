@@ -11,17 +11,15 @@ import json
 import os
 
 import torch
-from datasets import load_dataset
 from torch.utils.data import DataLoader
 
 from patch.utils.config import CONFIGS, LR_GRID, LR_SEEDS
-from patch.utils.dataset import DyePatchDataset, tuning_split
+from patch.utils.dataset import DyePatchDataset, load_hf_dataset, tuning_split
 from patch.utils.models import create_model, save_head
 from patch.utils.synthetic import SyntheticDyeOverlay
 from patch.utils.train import PatchTrainer, save_results, set_seed
 
 RESULTS_DIR = "patch/tuning/results/lr"
-HF_REPO = "mpg-ranch/dye_patch"
 N_EPOCHS = 10
 
 
@@ -42,16 +40,16 @@ def get_overlay_for_config(config: str) -> SyntheticDyeOverlay | None:
 def get_split_for_config(config: str, seed: int = 0):
     """Load and split data appropriate for the training config."""
     if config == "real_only":
-        ds = load_dataset(HF_REPO, "sprayed", split="train")
+        ds = load_hf_dataset("sprayed", "train")
     elif config == "hybrid":
         from datasets import concatenate_datasets
-        sprayed = load_dataset(HF_REPO, "sprayed", split="train")
-        annex = load_dataset(HF_REPO, "unsprayed_annex", split="train")
+        sprayed = load_hf_dataset("sprayed", "train")
+        annex = load_hf_dataset("unsprayed_annex", "train")
         ds = concatenate_datasets([sprayed, annex])
     elif config == "synth_local":
-        ds = load_dataset(HF_REPO, "unsprayed_annex", split="train")
+        ds = load_hf_dataset("unsprayed_annex", "train")
     elif config == "synth_offsite":
-        offsite_ds = load_dataset(HF_REPO, "offsite", split="train")
+        offsite_ds = load_hf_dataset("offsite", "train")
         return tuning_split(offsite_ds, seed=seed)
 
     return tuning_split(ds, seed=seed)

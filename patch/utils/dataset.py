@@ -9,6 +9,7 @@ Tiles are stored as 512px pre-crops in HuggingFace.  On-the-fly processing:
   5. ToTensor + Normalize
 """
 
+import os
 import random
 
 import numpy as np
@@ -36,6 +37,23 @@ from patch.utils.augmentations import (
 )
 from PIL import Image as PILImage
 from patch.utils.synthetic import SyntheticDyeOverlay
+
+HF_REPO = "mpg-ranch/dye_patch"
+
+
+def load_hf_dataset(config: str, split: str):
+    """Load HF dataset, preferring save_to_disk cache for offline use.
+
+    Checks HF_HOME/dye_patch/{config}/{split} first (arrow files saved by
+    cache_model_and_data.py). Falls back to load_dataset from Hub.
+    """
+    hf_home = os.environ.get("HF_HOME", os.path.expanduser("~/.cache/huggingface"))
+    disk_path = os.path.join(hf_home, "dye_patch", config, split)
+    if os.path.isdir(disk_path):
+        from datasets import load_from_disk
+        return load_from_disk(disk_path)
+    from datasets import load_dataset
+    return load_dataset(HF_REPO, config, split=split)
 
 
 def generate_patch_labels(
