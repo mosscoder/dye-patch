@@ -1,9 +1,8 @@
 """
 Learning rate grid search across configs and seeds.
 
-SLURM array: --array=0-79 (4 configs × 4 LRs × 5 seeds = 80 jobs)
-Index mapping: divmod(idx, 5) → (config_lr_idx, seed)
-               divmod(config_lr_idx, 4) → (config_idx, lr_idx)
+SLURM array: --array=0-24 (5 LRs × 5 seeds = 25 jobs)
+Index mapping: divmod(idx, 5) → (lr_idx, seed)
 """
 
 import argparse

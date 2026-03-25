@@ -2,7 +2,7 @@
 #SBATCH --job-name=dye_lr_sweep
 #SBATCH --partition=preempt
 #SBATCH --requeue
-#SBATCH --array=0-19
+#SBATCH --array=0-24
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=32G
 #SBATCH --gres=gpu:1
