@@ -134,27 +134,27 @@ def select_best_epoch(config: str, train_month: str | None = None) -> int:
     else:
         result_dir = os.path.join(RESULTS_DIR, "temporal", config, train_month)
 
-    all_val_losses = []
+    all_val_f1s = []
     for fold in range(N_FOLDS):
         path = os.path.join(result_dir, f"fold={fold}.json")
         if not os.path.exists(path):
             continue
         with open(path) as f:
             r = json.load(f)
-        losses = [h["loss"] for h in r["val_history"]]
-        all_val_losses.append(losses)
+        f1s = [h["f1"] for h in r["val_history"]]
+        all_val_f1s.append(f1s)
 
-    if not all_val_losses:
+    if not all_val_f1s:
         print(f"WARNING: no fold results found in {result_dir}, using {MAX_EPOCHS}")
         return MAX_EPOCHS
 
-    min_len = min(len(l) for l in all_val_losses)
-    mean_losses = [
-        np.mean([l[i] for l in all_val_losses]) for i in range(min_len)
+    min_len = min(len(l) for l in all_val_f1s)
+    mean_f1s = [
+        np.mean([l[i] for l in all_val_f1s]) for i in range(min_len)
     ]
-    best_epoch = int(np.argmin(mean_losses)) + 1
+    best_epoch = int(np.argmax(mean_f1s)) + 1
     label = f"{config}" if train_month is None else f"{config}/train_{train_month}"
-    print(f"Best epoch for {label}: {best_epoch} (mean val loss: {mean_losses[best_epoch-1]:.4f})")
+    print(f"Best epoch for {label}: {best_epoch} (mean val F1: {mean_f1s[best_epoch-1]:.4f})")
     return best_epoch
 
 

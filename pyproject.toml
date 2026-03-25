@@ -18,6 +18,7 @@ dependencies = [
     "rasterio",
     "pyproj",
     "matplotlib",
+    "tqdm",
 ]
 
 [tool.setuptools.packages.find]

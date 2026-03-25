@@ -96,32 +96,32 @@ def run_sweep(idx: int):
 
 
 def select_best_lr(config: str = "real_only") -> float:
-    """Select best LR by cross-seed mean validation loss.
+    """Select best LR by cross-seed mean super-patch F1.
 
     LR is established from real_only data and shared across all configs.
     The config arg is accepted for backward compatibility but ignored.
     """
     result_dir = os.path.join(RESULTS_DIR, "real_only")
     best_lr = None
-    best_loss = float("inf")
+    best_f1 = -1.0
 
     for lr in LR_GRID:
-        losses = []
+        f1s = []
         for seed in LR_SEEDS:
             path = os.path.join(result_dir, f"lr={lr}_seed={seed}.json")
             if not os.path.exists(path):
                 continue
             with open(path) as f:
                 r = json.load(f)
-            losses.append(r["best_val_loss"])
+            f1s.append(r["best_val_f1"])
 
-        if losses:
-            mean_loss = sum(losses) / len(losses)
-            if mean_loss < best_loss:
-                best_loss = mean_loss
+        if f1s:
+            mean_f1 = sum(f1s) / len(f1s)
+            if mean_f1 > best_f1:
+                best_f1 = mean_f1
                 best_lr = lr
 
-    print(f"Best LR: {best_lr} (mean val loss: {best_loss:.4f})")
+    print(f"Best LR: {best_lr} (mean val F1: {best_f1:.4f})")
     return best_lr
 
 

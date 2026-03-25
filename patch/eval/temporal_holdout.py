@@ -88,8 +88,7 @@ def run_holdout(idx: int):
 
     for epoch in range(1, n_epochs + 1):
         metrics = trainer.train_epoch(train_loader)
-        if epoch % 5 == 0:
-            print(f"Epoch {epoch}/{n_epochs} loss={metrics['loss']:.4f}")
+        print(f"Epoch {epoch:>3}/{n_epochs}  train_loss={metrics['loss']:.4f}")
 
     val_results = trainer.validate_epoch(eval_loader)
     spray_metrics = compute_spray_metrics(val_results["preds"], eval_hf)

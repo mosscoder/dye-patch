@@ -103,7 +103,7 @@ def run_eval(idx: int):
     # Train (no val loader for final training, use all train data)
     for epoch in range(1, n_epochs + 1):
         metrics = trainer.train_epoch(train_loader)
-        print(f"Epoch {epoch}/{n_epochs} loss={metrics['loss']:.4f}")
+        print(f"Epoch {epoch:>3}/{n_epochs}  train_loss={metrics['loss']:.4f}")
 
     # Evaluate on test set
     test_hf = load_dataset(HF_REPO, "sprayed", split="test")
