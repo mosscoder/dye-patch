@@ -17,17 +17,19 @@ import os
 
 import numpy as np
 import torch
+from datasets import load_dataset
 from sklearn.model_selection import KFold, StratifiedKFold
 from torch.utils.data import DataLoader
 
 from patch.utils.config import CONFIGS, MONTHS
-from patch.utils.dataset import DyePatchDataset, _get_point_strata, _point_indices, load_hf_dataset
+from patch.utils.dataset import DyePatchDataset, _get_point_strata, _point_indices
 from patch.utils.models import create_model
 from patch.utils.synthetic import SyntheticDyeOverlay
 from patch.utils.train import PatchTrainer, save_results, set_seed
 from patch.tuning.sweep_lr import collate_fn, select_best_lr
 
 RESULTS_DIR = "patch/tuning/results/epochs"
+HF_REPO = "mpg-ranch/dye_patch"
 MAX_EPOCHS = 50
 N_FOLDS = 5
 
@@ -42,17 +44,17 @@ def load_best_overlay(config: str) -> SyntheticDyeOverlay | None:
 def get_train_data_for_config(config: str):
     """Load full training split for a config."""
     if config == "real_only":
-        return load_hf_dataset("sprayed", "train")
+        return load_dataset(HF_REPO, "sprayed", split="train")
     elif config == "hybrid":
         from datasets import concatenate_datasets
-        sprayed = load_hf_dataset("sprayed", "train")
-        annex = load_hf_dataset("unsprayed_annex", "train")
+        sprayed = load_dataset(HF_REPO, "sprayed", split="train")
+        annex = load_dataset(HF_REPO, "unsprayed_annex", split="train")
         return concatenate_datasets([sprayed, annex])
     elif config == "synth_local":
-        return load_hf_dataset("unsprayed_annex", "train")
+        return load_dataset(HF_REPO, "unsprayed_annex", split="train")
     elif config == "synth_offsite":
-        return load_hf_dataset("offsite", "train")
-    return load_hf_dataset("sprayed", "train")
+        return load_dataset(HF_REPO, "offsite", split="train")
+    return load_dataset(HF_REPO, "sprayed", split="train")
 
 
 def _kfold_split(ds, fold_idx: int):
@@ -164,7 +166,7 @@ def _get_single_month_data(config: str, train_month: str):
     """Load training data for a single month, filtered by config."""
     if config == "synth_offsite":
         # Offsite has no months — use all offsite data
-        return load_hf_dataset("offsite", "train")
+        return load_dataset(HF_REPO, "offsite", split="train")
 
     ds = get_train_data_for_config(config)
     # Filter to the single training month

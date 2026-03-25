@@ -106,15 +106,14 @@ def push(
     sprayed_train, sprayed_test = stratified_split(sprayed_ds, test_frac=TUNING_TEST_FRAC, seed=seed)
     print(f"Sprayed train: {len(sprayed_train)}, test: {len(sprayed_test)}")
 
-    sprayed_dict = DatasetDict({"train": sprayed_train, "test": sprayed_test})
-    sprayed_dict.push_to_hub(repo, config_name="sprayed")
+    sprayed_train.push_to_hub(repo, config_name="sprayed", split="train")
+    sprayed_test.push_to_hub(repo, config_name="sprayed", split="test")
     print(f"Pushed sprayed config to {repo}")
 
     # Unsprayed annex: single split
     if len(annex_df) > 0:
         annex_ds = _manifest_to_dataset(annex_df)
-        annex_dict = DatasetDict({"train": annex_ds})
-        annex_dict.push_to_hub(repo, config_name="unsprayed_annex")
+        annex_ds.push_to_hub(repo, config_name="unsprayed_annex", split="train")
         print(f"Pushed unsprayed_annex config to {repo} ({len(annex_ds)} tiles)")
     else:
         print("Warning: no eastern block tiles found, skipping unsprayed_annex config")
@@ -123,8 +122,7 @@ def push(
     try:
         offsite_manifest = _load_offsite_manifest(offsite_tile_dir)
         offsite_ds = _manifest_to_dataset(offsite_manifest)
-        offsite_dict = DatasetDict({"train": offsite_ds})
-        offsite_dict.push_to_hub(repo, config_name="offsite")
+        offsite_ds.push_to_hub(repo, config_name="offsite", split="train")
         print(f"Pushed offsite config to {repo} ({len(offsite_ds)} tiles)")
     except FileNotFoundError:
         print("Warning: no offsite manifest found, skipping offsite config")

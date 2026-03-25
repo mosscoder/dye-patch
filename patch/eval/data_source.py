@@ -10,10 +10,11 @@ import os
 
 import numpy as np
 import torch
+from datasets import load_dataset
 from torch.utils.data import DataLoader
 
 from patch.utils.config import CONFIGS, EVAL_CROP_OFFSET, EVAL_SEED
-from patch.utils.dataset import DyePatchDataset, generate_patch_labels, load_hf_dataset
+from patch.utils.dataset import DyePatchDataset, generate_patch_labels
 from patch.utils.models import create_model, save_head
 from patch.utils.synthetic import SyntheticDyeOverlay
 from patch.utils.train import PatchTrainer, save_results, set_seed
@@ -21,6 +22,7 @@ from patch.tuning.sweep_epochs import get_train_data_for_config, load_best_overl
 from patch.tuning.sweep_lr import collate_fn, select_best_lr
 
 RESULTS_DIR = "patch/eval/results/data_source"
+HF_REPO = "mpg-ranch/dye_patch"
 
 
 def compute_spray_metrics(preds, test_dataset):
@@ -104,7 +106,7 @@ def run_eval(idx: int):
         print(f"Epoch {epoch}/{n_epochs} loss={metrics['loss']:.4f}")
 
     # Evaluate on test set
-    test_hf = load_hf_dataset("sprayed", "test")
+    test_hf = load_dataset(HF_REPO, "sprayed", split="test")
     test_ds = DyePatchDataset(test_hf, overlay=None, training=False)
     test_loader = DataLoader(test_ds, batch_size=32, shuffle=False, collate_fn=collate_fn, num_workers=4)
 

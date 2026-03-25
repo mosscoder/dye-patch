@@ -12,10 +12,11 @@ import argparse
 import os
 
 import torch
+from datasets import load_dataset
 from torch.utils.data import DataLoader
 
 from patch.utils.config import CONFIGS, EVAL_SEED, MONTHS
-from patch.utils.dataset import DyePatchDataset, load_hf_dataset
+from patch.utils.dataset import DyePatchDataset
 from patch.utils.models import create_model, save_head
 from patch.utils.train import PatchTrainer, save_results, set_seed
 from patch.tuning.sweep_epochs import load_best_overlay, select_best_epoch
@@ -23,21 +24,22 @@ from patch.tuning.sweep_lr import collate_fn, select_best_lr
 from patch.eval.data_source import compute_spray_metrics
 
 RESULTS_DIR = "patch/eval/results/temporal"
+HF_REPO = "mpg-ranch/dye_patch"
 
 
 def get_train_data_for_config_and_month(config: str, train_month: str):
     """Load data for one config filtered to a single month."""
     if config == "real_only":
-        ds = load_hf_dataset("sprayed", "train")
+        ds = load_dataset(HF_REPO, "sprayed", split="train")
     elif config == "hybrid":
         from datasets import concatenate_datasets
-        sprayed = load_hf_dataset("sprayed", "train")
-        annex = load_hf_dataset("unsprayed_annex", "train")
+        sprayed = load_dataset(HF_REPO, "sprayed", split="train")
+        annex = load_dataset(HF_REPO, "unsprayed_annex", split="train")
         ds = concatenate_datasets([sprayed, annex])
     elif config == "synth_local":
-        ds = load_hf_dataset("unsprayed_annex", "train")
+        ds = load_dataset(HF_REPO, "unsprayed_annex", split="train")
     elif config == "synth_offsite":
-        return load_hf_dataset("offsite", "train")
+        return load_dataset(HF_REPO, "offsite", split="train")
 
     # Filter to the single training month
     ds = ds.filter(lambda r: r["month"] == train_month)
@@ -46,7 +48,7 @@ def get_train_data_for_config_and_month(config: str, train_month: str):
 
 def get_eval_data_for_holdout(config: str, train_month: str):
     """Load test split for the two held-out months."""
-    ds = load_hf_dataset("sprayed", "test")
+    ds = load_dataset(HF_REPO, "sprayed", split="test")
     held_out_months = [m for m in MONTHS if m != train_month]
 
     # Filter to held-out months
