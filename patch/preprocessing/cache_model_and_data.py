@@ -39,8 +39,19 @@ def cache_model():
 
 
 def cache_datasets():
-    """Download all HF dataset configs. Cache location controlled by HF_HOME."""
+    """Download all HF dataset configs. Cache location controlled by HF_HOME.
+
+    Uses snapshot_download to cache the full repo (including data files) in
+    HF_HOME/hub/. This is required for offline loading — load_dataset alone
+    only caches README.md in the hub snapshot, so dataset_module_factory
+    cannot discover data files when HF_DATASETS_OFFLINE=1.
+    """
+    from huggingface_hub import snapshot_download
     from datasets import load_dataset
+
+    print(f"\nCaching full dataset repo: {HF_REPO}")
+    snapshot_download(HF_REPO, repo_type="dataset")
+    print("  Repo snapshot cached.")
 
     for config in HF_CONFIGS:
         print(f"\nCaching dataset: {HF_REPO} / {config}")
