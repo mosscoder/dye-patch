@@ -12,7 +12,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
 
-from patch.utils.config import EVAL_CROP_OFFSET, FOCAL_ALPHA, FOCAL_GAMMA, WEIGHT_DECAY
+from patch.utils.config import EVAL_CROP_OFFSET, FOCAL_ALPHA, FOCAL_GAMMA, NO_DYE_SAMPLE, WEIGHT_DECAY
 from patch.utils.dataset import generate_patch_labels
 
 
@@ -95,18 +95,52 @@ class PatchTrainer:
         self.gamma = FOCAL_GAMMA
 
     def focal_loss(self, logits, targets):
-        """Focal loss for per-patch classification.
+        """Focal loss with balanced patch sampling.
+
+        For each tile in the batch:
+          - All dye patches are included.
+          - An equal number of background patches are randomly sampled.
+          - Tiles with no dye sample NO_DYE_SAMPLE background patches.
+        Remaining patches are masked out of the loss.
 
         logits: [B, C, H, W]
         targets: [B, H, W]
-        alpha: weight for positive (dye) class; background gets 1 - alpha.
-        gamma: focusing parameter; higher = more suppression of easy examples.
         """
         ce = F.cross_entropy(logits, targets, reduction="none")  # [B, H, W]
         pt = torch.exp(-ce)
         alpha_t = torch.where(targets == 1, self.alpha, 1 - self.alpha)
-        loss = alpha_t * (1 - pt) ** self.gamma * ce
-        return loss.mean()
+        focal = alpha_t * (1 - pt) ** self.gamma * ce  # [B, H, W]
+
+        # Build per-tile sampling mask
+        B = targets.shape[0]
+        mask = torch.zeros_like(targets, dtype=torch.bool)
+
+        for i in range(B):
+            dye_idx = (targets[i] == 1).nonzero(as_tuple=False)  # [n_dye, 2]
+            n_dye = len(dye_idx)
+
+            if n_dye > 0:
+                # Include all dye patches
+                mask[i, dye_idx[:, 0], dye_idx[:, 1]] = True
+                # Sample equal number of background patches
+                bg_idx = (targets[i] == 0).nonzero(as_tuple=False)
+                n_sample = min(n_dye, len(bg_idx))
+                perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
+                sampled = bg_idx[perm]
+                mask[i, sampled[:, 0], sampled[:, 1]] = True
+            else:
+                # No dye: sample fixed number of background patches
+                bg_idx = (targets[i] == 0).nonzero(as_tuple=False)
+                n_sample = min(NO_DYE_SAMPLE, len(bg_idx))
+                perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
+                sampled = bg_idx[perm]
+                mask[i, sampled[:, 0], sampled[:, 1]] = True
+
+        # Mean over selected patches only
+        selected = focal[mask]
+        if len(selected) == 0:
+            return focal.mean()  # fallback
+        return selected.mean()
 
     def train_epoch(self, loader):
         """Run one training epoch.

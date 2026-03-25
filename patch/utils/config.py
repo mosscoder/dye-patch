@@ -64,6 +64,7 @@ WEIGHT_DECAY = 0.01
 # Focal loss (handles extreme class imbalance in patch grid)
 FOCAL_GAMMA = 2.0
 FOCAL_ALPHA = 0.25  # weight for dye (positive) class; background gets 1 - alpha
+NO_DYE_SAMPLE = 13  # background patches per no-dye tile (mean of 1 and 25 spray patch counts)
 
 # =============================================================================
 # Training configs
