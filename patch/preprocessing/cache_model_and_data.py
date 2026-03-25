@@ -5,10 +5,10 @@ Run once before submitting SLURM jobs. Downloads everything to the shared
 HF_HOME location so compute nodes don't each download independently.
 
 Usage (on cluster login node):
-  HF_HOME=/data/hf_cache python patch/preprocessing/cache_model_and_data.py
+  HF_HOME=/data/hf_cache python -m patch.preprocessing.cache_model_and_data
 
-The same HF_HOME is set in all sbatch files, so cached files are found
-automatically by downstream scripts.
+The same HF_HOME and HF_DATASETS_CACHE are set in all sbatch files, so
+cached files are found automatically by downstream scripts.
 """
 
 import os
@@ -17,6 +17,10 @@ import os
 hf_home = os.environ.get("HF_HOME")
 if hf_home:
     print(f"HF_HOME={hf_home}")
+    # Match wolverines pattern: processed dataset cache lives directly under
+    # HF_HOME, not HF_HOME/datasets/. This is what the offline fallback finds.
+    os.environ.setdefault("HF_DATASETS_CACHE", hf_home)
+    print(f"HF_DATASETS_CACHE={os.environ['HF_DATASETS_CACHE']}")
 else:
     print("WARNING: HF_HOME not set. Using default ~/.cache/huggingface/")
 
