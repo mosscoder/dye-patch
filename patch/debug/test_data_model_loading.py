@@ -1,6 +1,8 @@
 """Minimal test: can we load cached HF datasets and model on a compute node?"""
 
 import os
+import subprocess
+import sys
 
 from patch.utils.config import MODEL_NAME
 
@@ -15,112 +17,106 @@ def print_env():
 
     print(f"HF_HOME={os.environ.get('HF_HOME', '(not set)')}")
     print(f"HF_DATASETS_OFFLINE={os.environ.get('HF_DATASETS_OFFLINE', '(not set)')}")
-    print(f"HF_HUB_OFFLINE={os.environ.get('HF_HUB_OFFLINE', '(not set)')}")
     print(f"datasets=={datasets.__version__}")
     print(f"huggingface_hub=={huggingface_hub.__version__}")
 
 
 def inspect_cache():
     hf_home = os.environ.get("HF_HOME", "")
-    if not hf_home:
-        print("  HF_HOME not set, skipping")
-        return
 
-    # Inspect dye_patch hub cache (2 levels deep)
-    hub_ds = os.path.join(hf_home, "hub", "datasets--mpg-ranch--dye_patch")
-    print(f"\n--- dye_patch hub cache ---")
-    print(f"  {hub_ds} exists: {os.path.isdir(hub_ds)}")
+    # What's in the datasets processed cache?
+    ds_cache = os.path.join(hf_home, "datasets")
+    print(f"\n--- Processed cache: {ds_cache} ---")
+    if os.path.isdir(ds_cache):
+        entries = sorted(os.listdir(ds_cache))
+        for e in entries:
+            ep = os.path.join(ds_cache, e)
+            if os.path.isdir(ep):
+                children = sorted(os.listdir(ep))[:5]
+                print(f"  {e}/ : {children}")
+            else:
+                print(f"  {e} ({os.path.getsize(ep)} bytes)")
+    else:
+        print("  DOES NOT EXIST")
 
-    # Find the snapshot dir
-    snapshots_dir = os.path.join(hub_ds, "snapshots")
-    if os.path.isdir(snapshots_dir):
-        for snap in os.listdir(snapshots_dir):
-            snap_path = os.path.join(snapshots_dir, snap)
-            print(f"\n  snapshot/{snap[:12]}...:")
-            for entry in sorted(os.listdir(snap_path)):
-                entry_path = os.path.join(snap_path, entry)
-                if os.path.isdir(entry_path):
-                    children = sorted(os.listdir(entry_path))
-                    # Show file sizes for first few
-                    details = []
-                    for c in children[:5]:
-                        cp = os.path.join(entry_path, c)
-                        sz = os.path.getsize(cp) if os.path.isfile(cp) else "dir"
-                        details.append(f"{c} ({sz})")
-                    print(f"    {entry}/ [{len(children)} files]: {details}")
-                else:
-                    sz = os.path.getsize(entry_path)
-                    print(f"    {entry} ({sz} bytes)")
+    # What does wolverines processed cache look like?
+    print(f"\n--- Wolverines processed cache (for comparison) ---")
+    if os.path.isdir(ds_cache):
+        wol = [e for e in os.listdir(ds_cache) if "wolverine" in e.lower()]
+        for e in wol:
+            ep = os.path.join(ds_cache, e)
+            if os.path.isdir(ep):
+                children = sorted(os.listdir(ep))[:5]
+                print(f"  {e}/ : {children}")
 
-    # Compare with wolverines cache
-    wol_ds = os.path.join(hf_home, "hub", "datasets--kdoherty--wolverines")
-    print(f"\n--- wolverines hub cache (for comparison) ---")
-    print(f"  {wol_ds} exists: {os.path.isdir(wol_ds)}")
-    wol_snaps = os.path.join(wol_ds, "snapshots")
-    if os.path.isdir(wol_snaps):
-        for snap in os.listdir(wol_snaps):
-            snap_path = os.path.join(wol_snaps, snap)
-            entries = sorted(os.listdir(snap_path))
-            print(f"  snapshot/{snap[:12]}...: {entries[:10]}")
-            # Show first config dir if it exists
-            for entry in entries[:3]:
-                ep = os.path.join(snap_path, entry)
-                if os.path.isdir(ep):
-                    children = sorted(os.listdir(ep))[:5]
-                    details = []
-                    for c in children:
-                        cp = os.path.join(ep, c)
-                        sz = os.path.getsize(cp) if os.path.isfile(cp) else "dir"
-                        details.append(f"{c} ({sz})")
-                    print(f"    {entry}/ : {details}")
+
+def test_in_subprocess(label, env_overrides, load_code):
+    """Run a load_dataset test in a fresh subprocess to avoid cached env vars."""
+    env = os.environ.copy()
+    env.update(env_overrides)
+    # Remove keys set to None
+    for k, v in list(env.items()):
+        if v is None:
+            del env[k]
+
+    code = f"""
+import sys
+try:
+    {load_code}
+    print("OK " + str(len(ds)) + " rows")
+except Exception as e:
+    print(f"FAIL {{type(e).__name__}}: {{e}}")
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        env=env, capture_output=True, text=True, timeout=60,
+    )
+    output = (result.stdout + result.stderr).strip().split("\n")[-1]
+    print(f"  {label}: {output}")
 
 
 def test_load():
-    """Try loading sprayed/train with various approaches."""
-    from datasets import load_dataset
-
-    # Test 1: offline flag set
-    print("\n--- Test 1: HF_DATASETS_OFFLINE=1 ---")
-    os.environ["HF_DATASETS_OFFLINE"] = "1"
-    try:
-        ds = load_dataset(HF_REPO, TEST_CONFIG, split=TEST_SPLIT)
-        print(f"  OK   {len(ds)} rows")
-    except Exception as e:
-        print(f"  FAIL {type(e).__name__}: {e}")
-
-    # Test 2: offline flag unset
-    print("\n--- Test 2: HF_DATASETS_OFFLINE unset ---")
-    os.environ.pop("HF_DATASETS_OFFLINE", None)
-    os.environ.pop("HF_HUB_OFFLINE", None)
-    try:
-        ds = load_dataset(HF_REPO, TEST_CONFIG, split=TEST_SPLIT)
-        print(f"  OK   {len(ds)} rows")
-    except Exception as e:
-        print(f"  FAIL {type(e).__name__}: {e}")
-
-    # Test 3: load with explicit data_dir pointing to snapshot
-    print("\n--- Test 3: explicit data_dir from snapshot ---")
     hf_home = os.environ.get("HF_HOME", "")
-    snap_dir = os.path.join(hf_home, "hub", "datasets--mpg-ranch--dye_patch", "snapshots")
-    if os.path.isdir(snap_dir):
-        snaps = os.listdir(snap_dir)
-        if snaps:
-            data_dir = os.path.join(snap_dir, snaps[0])
-            print(f"  data_dir={data_dir}")
-            try:
-                ds = load_dataset(HF_REPO, TEST_CONFIG, split=TEST_SPLIT, data_dir=data_dir)
-                print(f"  OK   {len(ds)} rows")
-            except Exception as e:
-                print(f"  FAIL {type(e).__name__}: {e}")
 
-    # Test 4: load wolverines for comparison
-    print("\n--- Test 4: wolverines (known working) ---")
-    os.environ["HF_DATASETS_OFFLINE"] = "1"
-    try:
-        ds = load_dataset("kdoherty/wolverines", "reidentification", split="train")
-        print(f"  OK   {len(ds)} rows")
-    except Exception as e:
-        print(f"  FAIL {type(e).__name__}: {e}")
+    # Test 1: offline flag (current sbatch setup)
+    test_in_subprocess(
+        "HF_DATASETS_OFFLINE=1",
+        {"HF_DATASETS_OFFLINE": "1"},
+        f'from datasets import load_dataset; ds = load_dataset("{HF_REPO}", "{TEST_CONFIG}", split="{TEST_SPLIT}")',
+    )
+
+    # Test 2: no offline flag (fresh subprocess, clean env)
+    env2 = {}
+    if "HF_DATASETS_OFFLINE" in os.environ:
+        env2["HF_DATASETS_OFFLINE"] = None  # signals removal
+    if "HF_HUB_OFFLINE" in os.environ:
+        env2["HF_HUB_OFFLINE"] = None
+    # Build clean env for subprocess
+    clean_env = os.environ.copy()
+    clean_env.pop("HF_DATASETS_OFFLINE", None)
+    clean_env.pop("HF_HUB_OFFLINE", None)
+    code2 = f"""
+import sys
+try:
+    from datasets import load_dataset
+    ds = load_dataset("{HF_REPO}", "{TEST_CONFIG}", split="{TEST_SPLIT}")
+    print("OK " + str(len(ds)) + " rows")
+except Exception as e:
+    print(f"FAIL {{type(e).__name__}}: {{e}}")
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", code2],
+        env=clean_env, capture_output=True, text=True, timeout=120,
+    )
+    output = (result.stdout + result.stderr).strip().split("\n")[-1]
+    print(f"  No offline flags: {output}")
+
+    # Test 3: wolverines with offline flag
+    test_in_subprocess(
+        "wolverines/pelage offline",
+        {"HF_DATASETS_OFFLINE": "1"},
+        'from datasets import load_dataset; ds = load_dataset("kdoherty/wolverines", "pelage", split="train")',
+    )
 
 
 def test_model():
@@ -138,5 +134,7 @@ def test_model():
 if __name__ == "__main__":
     print_env()
     inspect_cache()
+
+    print("\n--- Load tests (subprocesses for clean env) ---")
     test_load()
     test_model()
