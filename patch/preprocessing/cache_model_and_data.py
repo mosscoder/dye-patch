@@ -39,18 +39,14 @@ def cache_model():
 
 
 def cache_datasets():
-    """Download all HF dataset configs to HF_HOME/datasets/."""
+    """Download all HF dataset configs. Cache location controlled by HF_HOME."""
     from datasets import load_dataset
-
-    hf_home = os.environ.get("HF_HOME", os.path.expanduser("~/.cache/huggingface"))
-    cache_dir = os.path.join(hf_home, "datasets")
-    print(f"  Dataset cache dir: {cache_dir}")
 
     for config in HF_CONFIGS:
         print(f"\nCaching dataset: {HF_REPO} / {config}")
         for split in ["train", "test"]:
             try:
-                ds = load_dataset(HF_REPO, config, split=split, cache_dir=cache_dir)
+                ds = load_dataset(HF_REPO, config, split=split)
                 print(f"  {config}/{split}: {len(ds)} rows")
             except Exception:
                 # Some configs only have "train" split
