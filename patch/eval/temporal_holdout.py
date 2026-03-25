@@ -24,7 +24,7 @@ from patch.tuning.sweep_lr import collate_fn, select_best_lr
 from patch.eval.data_source import compute_spray_metrics
 
 RESULTS_DIR = "patch/eval/results/temporal"
-HF_REPO = "mpg-ranch/dye_patch"
+HF_REPO = "mpg-ranch/dye-patch"
 
 
 def get_train_data_for_config_and_month(config: str, train_month: str):

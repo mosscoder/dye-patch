@@ -29,7 +29,7 @@ from patch.utils.augmentations import patch_aligned_crop
 from patch.utils.dataset import generate_patch_labels
 from patch.utils.synthetic import SyntheticDyeOverlay
 
-HF_REPO = "mpg-ranch/dye_patch"
+HF_REPO = "mpg-ranch/dye-patch"
 OUTPUT_DIR = "patch/visualizations/figures"
 N_COLS = 6
 

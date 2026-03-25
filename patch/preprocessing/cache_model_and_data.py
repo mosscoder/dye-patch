@@ -12,7 +12,7 @@ import os
 
 from patch.utils.config import MODEL_NAME
 
-HF_REPO = "mpg-ranch/dye_patch"
+HF_REPO = "mpg-ranch/dye-patch"
 HF_CONFIGS_SPLITS = [
     ("sprayed", "train"),
     ("sprayed", "test"),

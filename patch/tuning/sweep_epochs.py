@@ -29,7 +29,7 @@ from patch.utils.train import PatchTrainer, save_results, set_seed
 from patch.tuning.sweep_lr import collate_fn, select_best_lr
 
 RESULTS_DIR = "patch/tuning/results/epochs"
-HF_REPO = "mpg-ranch/dye_patch"
+HF_REPO = "mpg-ranch/dye-patch"
 MAX_EPOCHS = 50
 N_FOLDS = 5
 

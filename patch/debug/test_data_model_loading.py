@@ -3,8 +3,8 @@
 import os
 
 from patch.utils.config import MODEL_NAME
-from patch.utils.dataset import load_hf_dataset
 
+HF_REPO = "mpg-ranch/dye-patch"
 CONFIGS_SPLITS = [
     ("sprayed", "train"),
     ("sprayed", "test"),
@@ -18,26 +18,18 @@ def print_env():
     import huggingface_hub
 
     print(f"HF_HOME={os.environ.get('HF_HOME', '(not set)')}")
+    print(f"HF_DATASETS_OFFLINE={os.environ.get('HF_DATASETS_OFFLINE', '(not set)')}")
     print(f"datasets=={datasets.__version__}")
     print(f"huggingface_hub=={huggingface_hub.__version__}")
 
 
 def test_datasets():
-    print("\n--- Datasets ---")
-    hf_home = os.environ.get("HF_HOME", "")
-    disk_root = os.path.join(hf_home, "dye_patch") if hf_home else ""
-    print(f"  Disk cache root: {disk_root}")
-    print(f"  Exists: {os.path.isdir(disk_root)}")
-    if os.path.isdir(disk_root):
-        for d in sorted(os.listdir(disk_root)):
-            dp = os.path.join(disk_root, d)
-            if os.path.isdir(dp):
-                children = sorted(os.listdir(dp))
-                print(f"    {d}/ : {children}")
+    from datasets import load_dataset
 
+    print("\n--- Datasets ---")
     for config, split in CONFIGS_SPLITS:
         try:
-            ds = load_hf_dataset(config, split)
+            ds = load_dataset(HF_REPO, config, split=split)
             print(f"  OK   {config}/{split}: {len(ds)} rows")
         except Exception as e:
             print(f"  FAIL {config}/{split}: {type(e).__name__}: {e}")

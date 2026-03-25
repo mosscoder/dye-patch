@@ -22,7 +22,7 @@ from patch.tuning.sweep_epochs import get_train_data_for_config, load_best_overl
 from patch.tuning.sweep_lr import collate_fn, select_best_lr
 
 RESULTS_DIR = "patch/eval/results/data_source"
-HF_REPO = "mpg-ranch/dye_patch"
+HF_REPO = "mpg-ranch/dye-patch"
 
 
 def compute_spray_metrics(preds, test_dataset):

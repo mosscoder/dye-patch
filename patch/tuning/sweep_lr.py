@@ -21,7 +21,7 @@ from patch.utils.synthetic import SyntheticDyeOverlay
 from patch.utils.train import PatchTrainer, save_results, set_seed
 
 RESULTS_DIR = "patch/tuning/results/lr"
-HF_REPO = "mpg-ranch/dye_patch"
+HF_REPO = "mpg-ranch/dye-patch"
 N_EPOCHS = 10
 
 

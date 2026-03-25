@@ -7,9 +7,9 @@ Three configs:
   - offsite: single split (European grassland tiles)
 
 Usage:
-  load_dataset("mpg-ranch/dye_patch", "sprayed", split="train")
-  load_dataset("mpg-ranch/dye_patch", "unsprayed_annex")
-  load_dataset("mpg-ranch/dye_patch", "offsite")
+  load_dataset("mpg-ranch/dye-patch", "sprayed", split="train")
+  load_dataset("mpg-ranch/dye-patch", "unsprayed_annex")
+  load_dataset("mpg-ranch/dye-patch", "offsite")
 """
 
 import argparse
@@ -24,7 +24,7 @@ from patch.utils.dataset import stratified_split
 
 MPG_TILE_DIR = "data/images/mpg_ranch/tiles"
 OFFSITE_TILE_DIR = "data/images/european_grassland/tiles"
-HF_REPO = "mpg-ranch/dye_patch"
+HF_REPO = "mpg-ranch/dye-patch"
 
 FEATURES = Features({
     "image": Image(),
