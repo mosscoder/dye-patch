@@ -29,8 +29,9 @@ class DyePatchModel(nn.Module):
     def forward(self, x):
         with torch.no_grad():
             outputs = self.backbone(x)
-            # last_hidden_state: [B, 1 + num_patches, hidden_dim]
-            patch_tokens = outputs.last_hidden_state[:, 1:, :]  # drop CLS
+            # last_hidden_state: [B, 1 + n_register + num_patches, hidden_dim]
+            n_reg = getattr(self.backbone.config, "num_register_tokens", 0)
+            patch_tokens = outputs.last_hidden_state[:, 1 + n_reg:, :]
 
         # Shared linear applied to each token: [B, num_patches, num_classes]
         logits = self.classifier(patch_tokens)
