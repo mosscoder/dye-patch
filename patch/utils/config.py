@@ -61,6 +61,10 @@ LR_GRID = [0.0001, 0.0005, 0.001, 0.005]
 LR_SEEDS = [0, 1, 2, 3, 4]
 WEIGHT_DECAY = 0.01
 
+# Focal loss (handles extreme class imbalance in patch grid)
+FOCAL_GAMMA = 2.0
+FOCAL_ALPHA = 0.25  # weight for dye (positive) class; background gets 1 - alpha
+
 # =============================================================================
 # Training configs
 # =============================================================================

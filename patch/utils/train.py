@@ -9,9 +9,10 @@ import random
 import numpy as np
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from tqdm import tqdm
 
-from patch.utils.config import EVAL_CROP_OFFSET, WEIGHT_DECAY
+from patch.utils.config import EVAL_CROP_OFFSET, FOCAL_ALPHA, FOCAL_GAMMA, WEIGHT_DECAY
 from patch.utils.dataset import generate_patch_labels
 
 
@@ -90,7 +91,22 @@ class PatchTrainer:
         self.optimizer = torch.optim.AdamW(
             model.get_trainable_parameters(), lr=lr, weight_decay=weight_decay
         )
-        self.criterion = nn.CrossEntropyLoss()
+        self.alpha = FOCAL_ALPHA
+        self.gamma = FOCAL_GAMMA
+
+    def focal_loss(self, logits, targets):
+        """Focal loss for per-patch classification.
+
+        logits: [B, C, H, W]
+        targets: [B, H, W]
+        alpha: weight for positive (dye) class; background gets 1 - alpha.
+        gamma: focusing parameter; higher = more suppression of easy examples.
+        """
+        ce = F.cross_entropy(logits, targets, reduction="none")  # [B, H, W]
+        pt = torch.exp(-ce)
+        alpha_t = torch.where(targets == 1, self.alpha, 1 - self.alpha)
+        loss = alpha_t * (1 - pt) ** self.gamma * ce
+        return loss.mean()
 
     def train_epoch(self, loader):
         """Run one training epoch.
@@ -110,7 +126,7 @@ class PatchTrainer:
             masks = masks.to(self.device).long()
 
             logits = self.model(images)  # [B, C, 24, 24]
-            loss = self.criterion(logits, masks)
+            loss = self.focal_loss(logits, masks)
 
             self.optimizer.zero_grad()
             loss.backward()
@@ -145,7 +161,7 @@ class PatchTrainer:
             masks = masks.to(self.device).long()
 
             logits = self.model(images)
-            loss = self.criterion(logits, masks)
+            loss = self.focal_loss(logits, masks)
 
             total_loss += loss.item() * images.size(0)
             preds = logits.argmax(dim=1)
