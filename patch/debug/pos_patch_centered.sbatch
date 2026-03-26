@@ -5,6 +5,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --gres=gpu:1
+#SBATCH --exclude=babel-m5-32
 #SBATCH --time=2:00:00
 #SBATCH --output=/home/kdoherty/logs/dye_patch/debug/centroid/%A_%a.out
 #SBATCH --error=/home/kdoherty/logs/dye_patch/debug/centroid/%A_%a.err

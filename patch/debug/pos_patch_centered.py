@@ -98,8 +98,9 @@ def run(seed: int, lr: float):
     print(f"Centroid training: Model=large LR={lr} Seed={seed}")
     set_seed(seed)
 
+    from patch.utils.dataset import stratified_split
     ds = load_dataset(HF_REPO, "sprayed", split="train")
-    tune_train, tune_val = tuning_split(ds, seed=seed)
+    tune_train, tune_val = stratified_split(ds, test_frac=0.2, seed=seed)
 
     train_ds = DyePatchDataset(tune_train, overlay=None, training=True)
     val_ds = DyePatchDataset(tune_val, overlay=None, training=False)
@@ -205,4 +206,4 @@ if __name__ == "__main__":
     parser.add_argument("--idx", type=int, required=True)
     args = parser.parse_args()
     seed = args.idx
-    run(seed=seed, lr=5e-3)
+    run(seed=seed, lr=5e-4)
