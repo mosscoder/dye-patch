@@ -28,18 +28,12 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from patch.utils.config import (
-    EVAL_CROP_OFFSET,
     FOCAL_ALPHA,
     FOCAL_GAMMA,
-    GSD_M,
-    GRID_DIM,
-    MODEL_INPUT_SIZE,
     MODEL_NAME,
     NO_DYE_SAMPLE,
-    PRECROP_SIZE,
-    VIT_PATCH_SIZE,
 )
-from patch.utils.dataset import DyePatchDataset, generate_patch_labels, tuning_split
+from patch.utils.dataset import DyePatchDataset, tuning_split
 from patch.utils.models import create_model
 from patch.utils.train import compute_spray_metrics, save_results, set_seed
 
@@ -60,67 +54,38 @@ def collate_fn(batch):
     return images, masks, metadata
 
 
-def _centroid_patch(crop_offset, spray_size_m):
-    """Return (row, col) of the patch closest to the spray centroid."""
-    center_px = PRECROP_SIZE // 2
-    r = (center_px - crop_offset[0]) / VIT_PATCH_SIZE
-    c = (center_px - crop_offset[1]) / VIT_PATCH_SIZE
-    r = max(0, min(GRID_DIM - 1, int(r)))
-    c = max(0, min(GRID_DIM - 1, int(c)))
-    return r, c
+def _build_mask(targets):
+    """Build centroid-only loss mask from the targets tensor directly.
 
-
-def _peripheral_patches(crop_offset):
-    """Return list of (row, col) for patches fully outside spray bounds + margin.
-
-    Same logic as sweep_overlay._get_veg_patches: distance from spray center
-    must exceed spray_radius + VIT_PATCH_SIZE.
-    """
-    center_px = PRECROP_SIZE // 2
-    # Use 0.5m spray radius (largest spray) for conservative margin
-    spray_radius_px = int(0.5 / (2 * GSD_M))
-    margin_px = spray_radius_px + VIT_PATCH_SIZE
-
-    patches = []
-    for pr in range(GRID_DIM):
-        for pc in range(GRID_DIM):
-            py = crop_offset[0] + pr * VIT_PATCH_SIZE + VIT_PATCH_SIZE // 2
-            px = crop_offset[1] + pc * VIT_PATCH_SIZE + VIT_PATCH_SIZE // 2
-            dist = ((py - center_px) ** 2 + (px - center_px) ** 2) ** 0.5
-            if dist > margin_px:
-                patches.append((pr, pc))
-    return patches
-
-
-def _build_mask(targets, metadata_batch):
-    """Build centroid-only loss mask.
-
-    Sprayed tiles: 1 centroid patch + N_NEG peripheral patches.
+    Sprayed tiles: 1 patch closest to centroid of dye region + N_NEG random
+    background patches (from patches far from the dye centroid).
     No-dye tiles: NO_DYE_SAMPLE random background patches.
     """
     B = targets.shape[0]
     mask = torch.zeros_like(targets, dtype=torch.bool)
-    center_offset = EVAL_CROP_OFFSET
 
     for i in range(B):
-        meta = metadata_batch[i]
-        spray_size = meta.get("spray_size_m", 0.0)
-        color = meta.get("color", "none")
+        dye_idx = (targets[i] == 1).nonzero(as_tuple=False)  # [n_dye, 2]
 
-        if spray_size > 0 and color != "none":
-            # Centroid positive patch
-            cr, cc = _centroid_patch((center_offset, center_offset), spray_size)
-            mask[i, cr, cc] = True
+        if len(dye_idx) > 0:
+            # Find patch closest to centroid of dye region
+            centroid_r = dye_idx[:, 0].float().mean()
+            centroid_c = dye_idx[:, 1].float().mean()
+            dists = (dye_idx[:, 0].float() - centroid_r) ** 2 + (dye_idx[:, 1].float() - centroid_c) ** 2
+            best = dists.argmin()
+            mask[i, dye_idx[best, 0], dye_idx[best, 1]] = True
 
-            # Peripheral negative patches
-            periph = _peripheral_patches((center_offset, center_offset))
-            if periph:
-                indices = torch.randperm(len(periph))[:N_NEG]
-                for idx in indices:
-                    pr, pc = periph[idx]
-                    mask[i, pr, pc] = True
+            # Negative patches: background patches farthest from dye centroid
+            bg_idx = (targets[i] == 0).nonzero(as_tuple=False)
+            if len(bg_idx) > 0:
+                bg_dists = (bg_idx[:, 0].float() - centroid_r) ** 2 + (bg_idx[:, 1].float() - centroid_c) ** 2
+                # Sort by distance descending, take N_NEG farthest
+                n_sample = min(N_NEG, len(bg_idx))
+                _, far_idx = bg_dists.topk(n_sample)
+                sampled = bg_idx[far_idx]
+                mask[i, sampled[:, 0], sampled[:, 1]] = True
         else:
-            # No-dye tile: sample background patches
+            # No-dye tile: sample random background patches
             bg_idx = (targets[i] == 0).nonzero(as_tuple=False)
             n_sample = min(NO_DYE_SAMPLE, len(bg_idx))
             perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
@@ -130,14 +95,14 @@ def _build_mask(targets, metadata_batch):
     return mask
 
 
-def focal_loss_centroid(logits, targets, metadata_batch, alpha=FOCAL_ALPHA, gamma=FOCAL_GAMMA):
+def focal_loss_centroid(logits, targets, alpha=FOCAL_ALPHA, gamma=FOCAL_GAMMA):
     """Focal loss on centroid + peripheral patches only."""
     ce = F.cross_entropy(logits, targets, reduction="none")
     pt = torch.exp(-ce)
     alpha_t = torch.where(targets == 1, alpha, 1 - alpha)
     focal = alpha_t * (1 - pt) ** gamma * ce
 
-    mask = _build_mask(targets, metadata_batch)
+    mask = _build_mask(targets)
     selected = focal[mask]
     if len(selected) == 0:
         return focal.mean()
@@ -180,7 +145,7 @@ def run(seed: int, model_idx: int):
             masks = masks.to(device).long()
 
             logits = model(images)
-            loss = focal_loss_centroid(logits, masks, metadata)
+            loss = focal_loss_centroid(logits, masks)
 
             optimizer.zero_grad()
             loss.backward()
@@ -202,7 +167,7 @@ def run(seed: int, model_idx: int):
                 masks = masks.to(device).long()
 
                 logits = model(images)
-                loss = focal_loss_centroid(logits, masks, metadata)
+                loss = focal_loss_centroid(logits, masks)
                 val_loss_total += loss.item() * images.size(0)
 
                 preds = logits.argmax(dim=1)
