@@ -1,13 +1,12 @@
 """
 Centroid-only training experiment.
 
-For sprayed tiles: 1 positive patch (closest to spray center) + 3 negatives
-from the peripheral zone (fully outside spray bounds + 16px margin, same
-region used by sweep_overlay for HSV delta estimation).
+For sprayed tiles: 1 positive patch (closest to spray center) + 1 random
+negative from the peripheral zone (fully outside spray bounds + margin).
 
-For no-dye tiles: 13 background patches (same as main training).
+For no-dye tiles: 1 random background patch.
 
-Focal loss, LR=1e-4, seeds 0-2, 15 epochs, two model sizes.
+Binary cross-entropy, LR=1e-4, seeds 0-2, 15 epochs, two model sizes.
 SLURM array: --array=0-5 (3 seeds × 2 models)
 Index mapping: divmod(idx, 2) → (seed, model_idx)
   model_idx 0 = dinov3-vit7b16 (7B)
@@ -27,12 +26,7 @@ from datasets import load_dataset
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from patch.utils.config import (
-    FOCAL_ALPHA,
-    FOCAL_GAMMA,
-    MODEL_NAME,
-    NO_DYE_SAMPLE,
-)
+from patch.utils.config import MODEL_NAME
 from patch.utils.dataset import DyePatchDataset, tuning_split
 from patch.utils.models import create_model
 from patch.utils.train import compute_spray_metrics, save_results, set_seed
@@ -41,7 +35,6 @@ HF_REPO = "mpg-ranch/dye-patch"
 RESULTS_DIR = "patch/debug/results/centroid"
 LR = 1e-4
 N_EPOCHS = 15
-N_NEG = 3
 MODEL_NAME_LARGE = "facebook/dinov3-vitl16-pretrain-sat493m"
 MODELS = [MODEL_NAME, MODEL_NAME_LARGE]
 MODEL_LABELS = ["7b", "large"]
@@ -57,55 +50,57 @@ def collate_fn(batch):
 def _build_mask(targets):
     """Build centroid-only loss mask from the targets tensor directly.
 
-    Sprayed tiles: 1 patch closest to centroid of dye region + N_NEG random
-    background patches (from patches far from the dye centroid).
-    No-dye tiles: NO_DYE_SAMPLE random background patches.
+    Sprayed tiles: 1 patch closest to centroid of dye region + 1 random
+    peripheral negative (outside spray extent + 1 patch margin).
+    No-dye tiles: 1 random background patch.
     """
     B = targets.shape[0]
     mask = torch.zeros_like(targets, dtype=torch.bool)
 
     for i in range(B):
-        dye_idx = (targets[i] == 1).nonzero(as_tuple=False)  # [n_dye, 2]
+        dye_idx = (targets[i] == 1).nonzero(as_tuple=False)
 
         if len(dye_idx) > 0:
-            # Find patch closest to centroid of dye region
+            # 1 positive: patch closest to centroid
             centroid_r = dye_idx[:, 0].float().mean()
             centroid_c = dye_idx[:, 1].float().mean()
             dists = (dye_idx[:, 0].float() - centroid_r) ** 2 + (dye_idx[:, 1].float() - centroid_c) ** 2
             best = dists.argmin()
             mask[i, dye_idx[best, 0], dye_idx[best, 1]] = True
 
-            # Negative patches: background patches farthest from dye centroid
+            # 1 negative: random from peripheral zone
+            spray_radius = dists.max().sqrt() + 1.0
+            margin = spray_radius + 1.0
+
             bg_idx = (targets[i] == 0).nonzero(as_tuple=False)
             if len(bg_idx) > 0:
-                bg_dists = (bg_idx[:, 0].float() - centroid_r) ** 2 + (bg_idx[:, 1].float() - centroid_c) ** 2
-                # Sort by distance descending, take N_NEG farthest
-                n_sample = min(N_NEG, len(bg_idx))
-                _, far_idx = bg_dists.topk(n_sample)
-                sampled = bg_idx[far_idx]
-                mask[i, sampled[:, 0], sampled[:, 1]] = True
+                bg_dists = ((bg_idx[:, 0].float() - centroid_r) ** 2 +
+                            (bg_idx[:, 1].float() - centroid_c) ** 2).sqrt()
+                peripheral = bg_idx[bg_dists > margin]
+
+                if len(peripheral) > 0:
+                    idx = torch.randint(len(peripheral), (1,), device=targets.device)
+                    mask[i, peripheral[idx, 0], peripheral[idx, 1]] = True
+                else:
+                    idx = torch.randint(len(bg_idx), (1,), device=targets.device)
+                    mask[i, bg_idx[idx, 0], bg_idx[idx, 1]] = True
         else:
-            # No-dye tile: sample random background patches
+            # No-dye tile: 1 random background patch
             bg_idx = (targets[i] == 0).nonzero(as_tuple=False)
-            n_sample = min(NO_DYE_SAMPLE, len(bg_idx))
-            perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
-            sampled = bg_idx[perm]
-            mask[i, sampled[:, 0], sampled[:, 1]] = True
+            if len(bg_idx) > 0:
+                idx = torch.randint(len(bg_idx), (1,), device=targets.device)
+                mask[i, bg_idx[idx, 0], bg_idx[idx, 1]] = True
 
     return mask
 
 
-def focal_loss_centroid(logits, targets, alpha=FOCAL_ALPHA, gamma=FOCAL_GAMMA):
-    """Focal loss on centroid + peripheral patches only."""
+def balanced_bce(logits, targets):
+    """Binary cross-entropy on centroid + 1 peripheral patch only."""
     ce = F.cross_entropy(logits, targets, reduction="none")
-    pt = torch.exp(-ce)
-    alpha_t = torch.where(targets == 1, alpha, 1 - alpha)
-    focal = alpha_t * (1 - pt) ** gamma * ce
-
     mask = _build_mask(targets)
-    selected = focal[mask]
+    selected = ce[mask]
     if len(selected) == 0:
-        return focal.mean()
+        return ce.mean()
     return selected.mean()
 
 
@@ -145,7 +140,7 @@ def run(seed: int, model_idx: int):
             masks = masks.to(device).long()
 
             logits = model(images)
-            loss = focal_loss_centroid(logits, masks)
+            loss = balanced_bce(logits, masks)
 
             optimizer.zero_grad()
             loss.backward()
@@ -167,7 +162,7 @@ def run(seed: int, model_idx: int):
                 masks = masks.to(device).long()
 
                 logits = model(images)
-                loss = focal_loss_centroid(logits, masks)
+                loss = balanced_bce(logits, masks)
                 val_loss_total += loss.item() * images.size(0)
 
                 preds = logits.argmax(dim=1)
