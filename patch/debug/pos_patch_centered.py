@@ -6,15 +6,11 @@ negative from the peripheral zone (fully outside spray bounds + margin).
 
 For no-dye tiles: 1 random background patch.
 
-Binary cross-entropy, LR=1e-4, seeds 0-2, 15 epochs, two model sizes.
-SLURM array: --array=0-5 (3 seeds × 2 models)
-Index mapping: divmod(idx, 2) → (seed, model_idx)
-  model_idx 0 = dinov3-vit7b16 (7B)
-  model_idx 1 = dinov3-vitl16 (Large)
+Binary cross-entropy, dinov3-vitl16 (Large), LR=1e-3, seeds 0-2, 30 epochs.
+SLURM array: --array=0-2 (one job per seed)
 
 Usage:
-  python -u -m patch.debug.pos_patch_centered --idx 0  # seed=0, 7B
-  python -u -m patch.debug.pos_patch_centered --idx 1  # seed=0, Large
+  python -u -m patch.debug.pos_patch_centered --idx 0  # seed=0
 """
 
 import argparse
@@ -33,11 +29,8 @@ from patch.utils.train import compute_spray_metrics, save_results, set_seed
 
 HF_REPO = "mpg-ranch/dye-patch"
 RESULTS_DIR = "patch/debug/results/centroid"
-LR = 1e-4
-N_EPOCHS = 15
+N_EPOCHS = 30
 MODEL_NAME_LARGE = "facebook/dinov3-vitl16-pretrain-sat493m"
-MODELS = [MODEL_NAME, MODEL_NAME_LARGE]
-MODEL_LABELS = ["7b", "large"]
 
 
 def collate_fn(batch):
@@ -104,10 +97,8 @@ def balanced_bce(logits, targets):
     return selected.mean()
 
 
-def run(seed: int, model_idx: int):
-    model_name = MODELS[model_idx]
-    model_label = MODEL_LABELS[model_idx]
-    print(f"Centroid training: Model={model_label} LR={LR} Seed={seed}")
+def run(seed: int, lr: float):
+    print(f"Centroid training: Model=large LR={lr} Seed={seed}")
     set_seed(seed)
 
     ds = load_dataset(HF_REPO, "sprayed", split="train")
@@ -120,8 +111,8 @@ def run(seed: int, model_idx: int):
     val_loader = DataLoader(val_ds, batch_size=32, shuffle=False, collate_fn=collate_fn, num_workers=4)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = create_model(model_name=model_name, device=device)
-    optimizer = torch.optim.AdamW(model.get_trainable_parameters(), lr=LR, weight_decay=0.01)
+    model = create_model(model_name=MODEL_NAME_LARGE, device=device)
+    optimizer = torch.optim.AdamW(model.get_trainable_parameters(), lr=lr, weight_decay=0.01)
 
     train_history = []
     val_history = []
@@ -203,11 +194,11 @@ def run(seed: int, model_idx: int):
         "val_history": val_history,
         "best_epoch": best_epoch,
         "best_val_f1": best_val_f1,
-        "lr": LR,
+        "lr": lr,
         "seed": seed,
-        "model": model_label,
+        "model": "large",
     }
-    out_path = os.path.join(RESULTS_DIR, f"{model_label}_seed={seed}.json")
+    out_path = os.path.join(RESULTS_DIR, f"large_lr={lr}_seed={seed}.json")
     save_results(results, out_path)
     print(f"Saved to {out_path}")
 
@@ -216,5 +207,5 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--idx", type=int, required=True)
     args = parser.parse_args()
-    seed, model_idx = divmod(args.idx, len(MODELS))
-    run(seed=seed, model_idx=model_idx)
+    seed = args.idx
+    run(seed=seed, lr=1e-3)

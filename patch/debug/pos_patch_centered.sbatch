@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=dye_centroid
 #SBATCH --partition=general
-#SBATCH --array=0-5
+#SBATCH --array=0-2
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --gres=gpu:1
@@ -9,7 +9,7 @@
 #SBATCH --output=/home/kdoherty/logs/dye_patch/debug/centroid/%A_%a.out
 #SBATCH --error=/home/kdoherty/logs/dye_patch/debug/centroid/%A_%a.err
 
-# 6 jobs: 3 seeds × 2 models (7B, Large). Centroid-only, focal loss, LR=1e-4, 15 epochs.
+# 3 jobs: seeds 0-2. Large model, centroid-only, BCE, LR=1e-3, 30 epochs.
 
 source ~/.bashrc
 mamba activate dye_patch
