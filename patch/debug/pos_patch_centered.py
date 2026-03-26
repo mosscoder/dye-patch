@@ -1,24 +1,16 @@
 """
-Negative patch ratio sweep: how many negatives per positive.
+Loss function sweep: focal vs CE with 10x neg ratio.
 
-Ternary classification (none=0, red=1, blue=2), all spray patches as positives.
-3 neg ratios × 2 seeds = 6 jobs.
-
-Negative configs:
-  2x: 2 negatives per positive patch
-  10x: 10 negatives per positive patch
-  all: all non-spray patches
-
-CE loss, dinov3-vitl16 (Large), LR=5e-4, 30 epochs, 80/20 stratified split.
+Ternary classification (none=0, red=1, blue=2), all spray patches as positives,
+10x negatives, dinov3-vitl16 (Large), 30 epochs, 80/20 stratified split.
 F1 eval is color-agnostic (pred > 0 = dye).
 
-SLURM array: --array=0-5
-Index mapping: divmod(idx, 3) → (seed, config_idx)
+8 jobs = 2 loss fns × 2 LRs × 2 seeds
+SLURM array: --array=0-7
+Index mapping: divmod(idx, 4) → (seed, config_idx)
 
 Usage:
-  python -u -m patch.debug.pos_patch_centered --idx 0  # seed=0, 2x
-  python -u -m patch.debug.pos_patch_centered --idx 1  # seed=0, 10x
-  python -u -m patch.debug.pos_patch_centered --idx 2  # seed=0, all
+  python -u -m patch.debug.pos_patch_centered --idx 0  # seed=0, CE/1e-4
 """
 
 import argparse
@@ -30,22 +22,23 @@ from datasets import load_dataset
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+from patch.utils.config import FOCAL_ALPHA, FOCAL_GAMMA
 from patch.utils.dataset import DyePatchDataset, stratified_split
 from patch.utils.models import create_model
 from patch.utils.train import compute_spray_metrics, save_results, set_seed
 
 HF_REPO = "mpg-ranch/dye-patch"
-RESULTS_DIR = "patch/debug/results/neg_sweep"
-N_EPOCHS = 50
-LR = 5e-4
+RESULTS_DIR = "patch/debug/results/loss_sweep"
+N_EPOCHS = 30
+N_NEG_RATIO = 10
 NUM_CLASSES = 3
 MODEL_NAME_LARGE = "facebook/dinov3-vitl16-pretrain-sat493m"
 
 CONFIGS = [
-    ("2x", 5e-4),
-    ("10x", 5e-4),
-    ("all", 5e-4),
-    ("all", 1e-3),
+    ("ce", 1e-4),
+    ("ce", 5e-4),
+    ("focal", 1e-4),
+    ("focal", 5e-4),
 ]
 COLOR_TO_LABEL = {"red": 1, "blue": 2}
 
@@ -68,14 +61,8 @@ def _relabel_ternary(masks, metadata_batch):
     return masks
 
 
-def _build_mask(targets, neg_config):
-    """Build loss mask: all positive spray patches, configurable negatives.
-
-    neg_config:
-      "2x": 2 negatives per positive patch
-      "10x": 10 negatives per positive patch
-      "all": all non-spray patches
-    """
+def _build_mask(targets):
+    """All positive spray patches + 10x random negatives."""
     B = targets.shape[0]
     mask = torch.zeros_like(targets, dtype=torch.bool)
 
@@ -83,22 +70,16 @@ def _build_mask(targets, neg_config):
         dye_idx = (targets[i] > 0).nonzero(as_tuple=False)
 
         if len(dye_idx) > 0:
-            # All positive patches
             mask[i, dye_idx[:, 0], dye_idx[:, 1]] = True
             n_pos = len(dye_idx)
 
             bg_idx = (targets[i] == 0).nonzero(as_tuple=False)
             if len(bg_idx) > 0:
-                if neg_config == "all":
-                    mask[i, bg_idx[:, 0], bg_idx[:, 1]] = True
-                else:
-                    ratio = 2 if neg_config == "2x" else 10
-                    n_sample = min(n_pos * ratio, len(bg_idx))
-                    perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
-                    sampled = bg_idx[perm]
-                    mask[i, sampled[:, 0], sampled[:, 1]] = True
+                n_sample = min(n_pos * N_NEG_RATIO, len(bg_idx))
+                perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
+                sampled = bg_idx[perm]
+                mask[i, sampled[:, 0], sampled[:, 1]] = True
         else:
-            # No-dye tile: 10 random background patches
             bg_idx = (targets[i] == 0).nonzero(as_tuple=False)
             if len(bg_idx) > 0:
                 n_sample = min(10, len(bg_idx))
@@ -109,8 +90,26 @@ def _build_mask(targets, neg_config):
     return mask
 
 
-def run(seed: int, neg_config: str, lr: float):
-    print(f"Neg sweep: config={neg_config} LR={lr} Seed={seed}")
+def compute_loss(logits, targets, loss_fn):
+    """CE or focal loss on masked patches."""
+    ce = F.cross_entropy(logits, targets, reduction="none")
+
+    if loss_fn == "focal":
+        pt = torch.exp(-ce)
+        alpha_t = torch.where(targets > 0, FOCAL_ALPHA, 1 - FOCAL_ALPHA)
+        per_patch = alpha_t * (1 - pt) ** FOCAL_GAMMA * ce
+    else:
+        per_patch = ce
+
+    mask = _build_mask(targets)
+    selected = per_patch[mask]
+    if len(selected) == 0:
+        return per_patch.mean()
+    return selected.mean()
+
+
+def run(seed: int, loss_fn: str, lr: float):
+    print(f"Loss sweep: loss={loss_fn} LR={lr} Seed={seed}")
     set_seed(seed)
 
     ds = load_dataset(HF_REPO, "sprayed", split="train")
@@ -143,10 +142,7 @@ def run(seed: int, neg_config: str, lr: float):
             masks = _relabel_ternary(masks, metadata)
 
             logits = model(images)
-            ce = F.cross_entropy(logits, masks, reduction="none")
-            loss_mask = _build_mask(masks, neg_config)
-            selected = ce[loss_mask]
-            loss = selected.mean() if len(selected) > 0 else ce.mean()
+            loss = compute_loss(logits, masks, loss_fn)
 
             optimizer.zero_grad()
             loss.backward()
@@ -168,10 +164,8 @@ def run(seed: int, neg_config: str, lr: float):
                 masks = _relabel_ternary(masks, metadata)
 
                 logits = model(images)
-                ce = F.cross_entropy(logits, masks, reduction="none")
-                loss_mask = _build_mask(masks, neg_config)
-                selected = ce[loss_mask]
-                val_loss_total += (selected.mean() if len(selected) > 0 else ce.mean()).item() * images.size(0)
+                loss = compute_loss(logits, masks, loss_fn)
+                val_loss_total += loss.item() * images.size(0)
 
                 preds = logits.argmax(dim=1)
                 all_preds.append(preds.cpu())
@@ -213,10 +207,10 @@ def run(seed: int, neg_config: str, lr: float):
         "best_val_f1": best_val_f1,
         "lr": lr,
         "seed": seed,
-        "neg_config": neg_config,
+        "loss_fn": loss_fn,
         "model": "large",
     }
-    out_path = os.path.join(RESULTS_DIR, f"{neg_config}_lr={lr}_seed={seed}.json")
+    out_path = os.path.join(RESULTS_DIR, f"{loss_fn}_lr={lr}_seed={seed}.json")
     save_results(results, out_path)
     print(f"Saved to {out_path}")
 
@@ -226,5 +220,5 @@ if __name__ == "__main__":
     parser.add_argument("--idx", type=int, required=True)
     args = parser.parse_args()
     seed, config_idx = divmod(args.idx, len(CONFIGS))
-    neg_config, lr = CONFIGS[config_idx]
-    run(seed=seed, neg_config=neg_config, lr=lr)
+    loss_fn, lr = CONFIGS[config_idx]
+    run(seed=seed, loss_fn=loss_fn, lr=lr)
