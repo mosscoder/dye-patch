@@ -1,48 +1,49 @@
 """
-Centroid-only training experiment: binary vs ternary classification.
+Positive patch selection sweep: how many spray patches to include in loss.
 
-For sprayed tiles: 1 positive patch (closest to spray center) + 10 random
-negatives from non-spray area.
-For no-dye tiles: 10 random background patches.
+Ternary classification (none=0, red=1, blue=2), centroid-based selection.
+3 configs × 2 seeds = 6 jobs.
 
-Cross-entropy, dinov3-vitl16 (Large), LR=5e-4, seeds 0-2, 30 epochs.
-SLURM array: --array=0-5 (3 seeds × 2 configs)
-Index mapping: divmod(idx, 2) → (seed, config_idx)
-  config_idx 0 = binary (none/dye, 2 classes)
-  config_idx 1 = ternary (none/red/blue, 3 classes)
+Positive patch configs:
+  centroid: 1 patch closest to spray center
+  half: 50% of patches closest to spray center
+  all: 100% of labeled spray patches
 
-F1 eval is always color-agnostic (pred > 0 = dye).
+All configs: 10 random negatives from non-spray area, CE loss,
+dinov3-vitl16 (Large), LR=5e-4, 30 epochs, 80/20 stratified split.
+F1 eval is color-agnostic (pred > 0 = dye).
+
+SLURM array: --array=0-5
+Index mapping: divmod(idx, 3) → (seed, config_idx)
 
 Usage:
-  python -u -m patch.debug.pos_patch_centered --idx 0  # seed=0, binary
-  python -u -m patch.debug.pos_patch_centered --idx 1  # seed=0, ternary
+  python -u -m patch.debug.pos_patch_centered --idx 0  # seed=0, centroid
+  python -u -m patch.debug.pos_patch_centered --idx 1  # seed=0, half
+  python -u -m patch.debug.pos_patch_centered --idx 2  # seed=0, all
 """
 
 import argparse
 import os
 
-import numpy as np
 import torch
 import torch.nn.functional as F
 from datasets import load_dataset
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from patch.utils.config import MODEL_NAME
 from patch.utils.dataset import DyePatchDataset, stratified_split
 from patch.utils.models import create_model
 from patch.utils.train import compute_spray_metrics, save_results, set_seed
 
 HF_REPO = "mpg-ranch/dye-patch"
-RESULTS_DIR = "patch/debug/results/centroid"
+RESULTS_DIR = "patch/debug/results/pos_sweep"
 N_EPOCHS = 30
 N_NEG = 10
 LR = 5e-4
+NUM_CLASSES = 3
 MODEL_NAME_LARGE = "facebook/dinov3-vitl16-pretrain-sat493m"
-CLASS_CONFIGS = [
-    {"name": "binary", "num_classes": 2},
-    {"name": "ternary", "num_classes": 3},
-]
+
+POS_CONFIGS = ["centroid", "half", "all"]
 COLOR_TO_LABEL = {"red": 1, "blue": 2}
 
 
@@ -64,14 +65,13 @@ def _relabel_ternary(masks, metadata_batch):
     return masks
 
 
-def _build_mask(targets):
-    """Build centroid-only loss mask from the targets tensor.
+def _build_mask(targets, pos_config):
+    """Build loss mask with configurable positive patch selection.
 
-    Sprayed tiles: 1 patch closest to centroid of dye region + N_NEG random
-    negatives from all non-spray patches.
-    No-dye tiles: N_NEG random background patches.
-
-    Works for both binary (dye=1) and ternary (red=1, blue=2) targets.
+    pos_config:
+      "centroid": 1 patch closest to spray center
+      "half": 50% of patches closest to center
+      "all": all labeled spray patches
     """
     B = targets.shape[0]
     mask = torch.zeros_like(targets, dtype=torch.bool)
@@ -83,12 +83,23 @@ def _build_mask(targets):
             centroid_r = dye_idx[:, 0].float().mean()
             centroid_c = dye_idx[:, 1].float().mean()
             dists = (dye_idx[:, 0].float() - centroid_r) ** 2 + (dye_idx[:, 1].float() - centroid_c) ** 2
-            best = dists.argmin()
-            mask[i, dye_idx[best, 0], dye_idx[best, 1]] = True
 
+            if pos_config == "centroid":
+                best = dists.argmin()
+                mask[i, dye_idx[best, 0], dye_idx[best, 1]] = True
+            elif pos_config == "half":
+                n_keep = max(1, len(dye_idx) // 2)
+                _, closest = dists.topk(n_keep, largest=False)
+                for j in closest:
+                    mask[i, dye_idx[j, 0], dye_idx[j, 1]] = True
+            else:  # "all"
+                mask[i, dye_idx[:, 0], dye_idx[:, 1]] = True
+
+            # 10× negatives scaled to positive count
+            n_pos = int(mask[i].sum())
             bg_idx = (targets[i] == 0).nonzero(as_tuple=False)
             if len(bg_idx) > 0:
-                n_sample = min(N_NEG, len(bg_idx))
+                n_sample = min(n_pos * N_NEG, len(bg_idx))
                 perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
                 sampled = bg_idx[perm]
                 mask[i, sampled[:, 0], sampled[:, 1]] = True
@@ -103,23 +114,8 @@ def _build_mask(targets):
     return mask
 
 
-def balanced_ce(logits, targets):
-    """Cross-entropy on centroid + N_NEG background patches only."""
-    ce = F.cross_entropy(logits, targets, reduction="none")
-    mask = _build_mask(targets)
-    selected = ce[mask]
-    if len(selected) == 0:
-        return ce.mean()
-    return selected.mean()
-
-
-def run(seed: int, config_idx: int):
-    cfg = CLASS_CONFIGS[config_idx]
-    cfg_name = cfg["name"]
-    num_classes = cfg["num_classes"]
-    is_ternary = num_classes == 3
-
-    print(f"Centroid training: config={cfg_name} num_classes={num_classes} LR={LR} Seed={seed}")
+def run(seed: int, pos_config: str):
+    print(f"Pos sweep: config={pos_config} LR={LR} Seed={seed}")
     set_seed(seed)
 
     ds = load_dataset(HF_REPO, "sprayed", split="train")
@@ -132,7 +128,7 @@ def run(seed: int, config_idx: int):
     val_loader = DataLoader(val_ds, batch_size=32, shuffle=False, collate_fn=collate_fn, num_workers=4)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model = create_model(model_name=MODEL_NAME_LARGE, num_classes=num_classes, device=device)
+    model = create_model(model_name=MODEL_NAME_LARGE, num_classes=NUM_CLASSES, device=device)
     optimizer = torch.optim.AdamW(model.get_trainable_parameters(), lr=LR, weight_decay=0.01)
 
     train_history = []
@@ -142,7 +138,6 @@ def run(seed: int, config_idx: int):
     best_state = None
 
     for epoch in range(1, N_EPOCHS + 1):
-        # Train
         model.train()
         model.backbone.eval()
         total_loss = 0.0
@@ -150,11 +145,13 @@ def run(seed: int, config_idx: int):
         for images, masks, metadata in tqdm(train_loader, desc="  train", leave=False):
             images = images.to(device)
             masks = masks.to(device).long()
-            if is_ternary:
-                masks = _relabel_ternary(masks, metadata)
+            masks = _relabel_ternary(masks, metadata)
 
             logits = model(images)
-            loss = balanced_ce(logits, masks)
+            ce = F.cross_entropy(logits, masks, reduction="none")
+            loss_mask = _build_mask(masks, pos_config)
+            selected = ce[loss_mask]
+            loss = selected.mean() if len(selected) > 0 else ce.mean()
 
             optimizer.zero_grad()
             loss.backward()
@@ -164,7 +161,6 @@ def run(seed: int, config_idx: int):
         train_loss = total_loss / max(len(train_ds), 1)
         train_history.append({"loss": train_loss})
 
-        # Validate (super-patch F1, color-agnostic: pred > 0 = dye)
         model.eval()
         val_loss_total = 0.0
         all_preds = []
@@ -174,12 +170,13 @@ def run(seed: int, config_idx: int):
             for images, masks, metadata in tqdm(val_loader, desc="  val", leave=False):
                 images = images.to(device)
                 masks = masks.to(device).long()
-                if is_ternary:
-                    masks = _relabel_ternary(masks, metadata)
+                masks = _relabel_ternary(masks, metadata)
 
                 logits = model(images)
-                loss = balanced_ce(logits, masks)
-                val_loss_total += loss.item() * images.size(0)
+                ce = F.cross_entropy(logits, masks, reduction="none")
+                loss_mask = _build_mask(masks, pos_config)
+                selected = ce[loss_mask]
+                val_loss_total += (selected.mean() if len(selected) > 0 else ce.mean()).item() * images.size(0)
 
                 preds = logits.argmax(dim=1)
                 all_preds.append(preds.cpu())
@@ -221,11 +218,10 @@ def run(seed: int, config_idx: int):
         "best_val_f1": best_val_f1,
         "lr": LR,
         "seed": seed,
-        "config": cfg_name,
-        "num_classes": num_classes,
+        "pos_config": pos_config,
         "model": "large",
     }
-    out_path = os.path.join(RESULTS_DIR, f"{cfg_name}_seed={seed}.json")
+    out_path = os.path.join(RESULTS_DIR, f"{pos_config}_seed={seed}.json")
     save_results(results, out_path)
     print(f"Saved to {out_path}")
 
@@ -234,5 +230,5 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--idx", type=int, required=True)
     args = parser.parse_args()
-    seed, config_idx = divmod(args.idx, len(CLASS_CONFIGS))
-    run(seed=seed, config_idx=config_idx)
+    seed, config_idx = divmod(args.idx, len(POS_CONFIGS))
+    run(seed=seed, pos_config=POS_CONFIGS[config_idx])

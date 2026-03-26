@@ -10,7 +10,7 @@
 #SBATCH --output=/home/kdoherty/logs/dye_patch/debug/centroid/%A_%a.out
 #SBATCH --error=/home/kdoherty/logs/dye_patch/debug/centroid/%A_%a.err
 
-# 6 jobs: 3 seeds × 2 configs (binary, ternary). Large model, centroid-only, CE, LR=5e-4, 30 epochs.
+# 6 jobs: 2 seeds × 3 pos configs (centroid, half, all). Ternary, Large, CE, LR=5e-4, 30 epochs.
 
 source ~/.bashrc
 mamba activate dye_patch
