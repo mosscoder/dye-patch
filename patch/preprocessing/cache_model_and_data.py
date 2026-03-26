@@ -12,6 +12,8 @@ import os
 
 from patch.utils.config import MODEL_NAME
 
+MODEL_NAME_LARGE = "facebook/dinov3-vitl16-pretrain-sat493m"
+
 HF_REPO = "mpg-ranch/dye-patch"
 HF_CONFIGS_SPLITS = [
     ("sprayed", "train"),
@@ -25,12 +27,13 @@ def cache_model():
     """Download model weights to HF_HOME/hub/."""
     from transformers import AutoModel, AutoImageProcessor
 
-    print(f"\nCaching model: {MODEL_NAME}")
-    print("  Downloading image processor...")
-    AutoImageProcessor.from_pretrained(MODEL_NAME)
-    print("  Downloading model weights (this may take a while)...")
-    AutoModel.from_pretrained(MODEL_NAME)
-    print("  Model cached.")
+    for name in [MODEL_NAME, MODEL_NAME_LARGE]:
+        print(f"\nCaching model: {name}")
+        print("  Downloading image processor...")
+        AutoImageProcessor.from_pretrained(name)
+        print("  Downloading model weights (this may take a while)...")
+        AutoModel.from_pretrained(name)
+        print(f"  {name} cached.")
 
 
 def cache_datasets():
