@@ -6,7 +6,8 @@ negative from the peripheral zone (fully outside spray bounds + margin).
 
 For no-dye tiles: 1 random background patch.
 
-Binary cross-entropy, dinov3-vitl16 (Large), LR=1e-3, seeds 0-2, 30 epochs.
+Binary cross-entropy, dinov3-vitl16 (Large), LR=5e-3, seeds 0-2, 30 epochs.
+1 centroid positive + 10 random negatives from non-spray area.
 SLURM array: --array=0-2 (one job per seed)
 
 Usage:
@@ -40,12 +41,15 @@ def collate_fn(batch):
     return images, masks, metadata
 
 
+N_NEG = 10
+
+
 def _build_mask(targets):
     """Build centroid-only loss mask from the targets tensor directly.
 
-    Sprayed tiles: 1 patch closest to centroid of dye region + 1 random
-    peripheral negative (outside spray extent + 1 patch margin).
-    No-dye tiles: 1 random background patch.
+    Sprayed tiles: 1 patch closest to centroid of dye region + N_NEG random
+    negatives from all non-spray patches.
+    No-dye tiles: N_NEG random background patches.
     """
     B = targets.shape[0]
     mask = torch.zeros_like(targets, dtype=torch.bool)
@@ -61,28 +65,21 @@ def _build_mask(targets):
             best = dists.argmin()
             mask[i, dye_idx[best, 0], dye_idx[best, 1]] = True
 
-            # 1 negative: random from peripheral zone
-            spray_radius = dists.max().sqrt() + 1.0
-            margin = spray_radius + 1.0
-
+            # N_NEG random negatives from all non-spray patches
             bg_idx = (targets[i] == 0).nonzero(as_tuple=False)
             if len(bg_idx) > 0:
-                bg_dists = ((bg_idx[:, 0].float() - centroid_r) ** 2 +
-                            (bg_idx[:, 1].float() - centroid_c) ** 2).sqrt()
-                peripheral = bg_idx[bg_dists > margin]
-
-                if len(peripheral) > 0:
-                    idx = torch.randint(len(peripheral), (1,), device=targets.device)
-                    mask[i, peripheral[idx, 0], peripheral[idx, 1]] = True
-                else:
-                    idx = torch.randint(len(bg_idx), (1,), device=targets.device)
-                    mask[i, bg_idx[idx, 0], bg_idx[idx, 1]] = True
+                n_sample = min(N_NEG, len(bg_idx))
+                perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
+                sampled = bg_idx[perm]
+                mask[i, sampled[:, 0], sampled[:, 1]] = True
         else:
-            # No-dye tile: 1 random background patch
+            # No-dye tile: N_NEG random background patches
             bg_idx = (targets[i] == 0).nonzero(as_tuple=False)
             if len(bg_idx) > 0:
-                idx = torch.randint(len(bg_idx), (1,), device=targets.device)
-                mask[i, bg_idx[idx, 0], bg_idx[idx, 1]] = True
+                n_sample = min(N_NEG, len(bg_idx))
+                perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
+                sampled = bg_idx[perm]
+                mask[i, sampled[:, 0], sampled[:, 1]] = True
 
     return mask
 
@@ -208,4 +205,4 @@ if __name__ == "__main__":
     parser.add_argument("--idx", type=int, required=True)
     args = parser.parse_args()
     seed = args.idx
-    run(seed=seed, lr=1e-3)
+    run(seed=seed, lr=5e-3)
