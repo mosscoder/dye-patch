@@ -1,24 +1,23 @@
 """
-Positive patch selection sweep: how many spray patches to include in loss.
+Negative patch ratio sweep: how many negatives per positive.
 
-Ternary classification (none=0, red=1, blue=2), centroid-based selection.
-3 configs × 2 seeds = 6 jobs.
+Ternary classification (none=0, red=1, blue=2), all spray patches as positives.
+3 neg ratios × 2 seeds = 6 jobs.
 
-Positive patch configs:
-  centroid: 1 patch closest to spray center
-  half: 50% of patches closest to spray center
-  all: 100% of labeled spray patches
+Negative configs:
+  2x: 2 negatives per positive patch
+  10x: 10 negatives per positive patch
+  all: all non-spray patches
 
-All configs: 10 random negatives from non-spray area, CE loss,
-dinov3-vitl16 (Large), LR=5e-4, 30 epochs, 80/20 stratified split.
+CE loss, dinov3-vitl16 (Large), LR=5e-4, 30 epochs, 80/20 stratified split.
 F1 eval is color-agnostic (pred > 0 = dye).
 
 SLURM array: --array=0-5
 Index mapping: divmod(idx, 3) → (seed, config_idx)
 
 Usage:
-  python -u -m patch.debug.pos_patch_centered --idx 0  # seed=0, centroid
-  python -u -m patch.debug.pos_patch_centered --idx 1  # seed=0, half
+  python -u -m patch.debug.pos_patch_centered --idx 0  # seed=0, 2x
+  python -u -m patch.debug.pos_patch_centered --idx 1  # seed=0, 10x
   python -u -m patch.debug.pos_patch_centered --idx 2  # seed=0, all
 """
 
@@ -36,14 +35,13 @@ from patch.utils.models import create_model
 from patch.utils.train import compute_spray_metrics, save_results, set_seed
 
 HF_REPO = "mpg-ranch/dye-patch"
-RESULTS_DIR = "patch/debug/results/pos_sweep"
+RESULTS_DIR = "patch/debug/results/neg_sweep"
 N_EPOCHS = 30
-N_NEG = 10
 LR = 5e-4
 NUM_CLASSES = 3
 MODEL_NAME_LARGE = "facebook/dinov3-vitl16-pretrain-sat493m"
 
-POS_CONFIGS = ["centroid", "half", "all"]
+NEG_CONFIGS = ["2x", "10x", "all"]
 COLOR_TO_LABEL = {"red": 1, "blue": 2}
 
 
@@ -65,13 +63,13 @@ def _relabel_ternary(masks, metadata_batch):
     return masks
 
 
-def _build_mask(targets, pos_config):
-    """Build loss mask with configurable positive patch selection.
+def _build_mask(targets, neg_config):
+    """Build loss mask: all positive spray patches, configurable negatives.
 
-    pos_config:
-      "centroid": 1 patch closest to spray center
-      "half": 50% of patches closest to center
-      "all": all labeled spray patches
+    neg_config:
+      "2x": 2 negatives per positive patch
+      "10x": 10 negatives per positive patch
+      "all": all non-spray patches
     """
     B = targets.shape[0]
     mask = torch.zeros_like(targets, dtype=torch.bool)
@@ -80,33 +78,25 @@ def _build_mask(targets, pos_config):
         dye_idx = (targets[i] > 0).nonzero(as_tuple=False)
 
         if len(dye_idx) > 0:
-            centroid_r = dye_idx[:, 0].float().mean()
-            centroid_c = dye_idx[:, 1].float().mean()
-            dists = (dye_idx[:, 0].float() - centroid_r) ** 2 + (dye_idx[:, 1].float() - centroid_c) ** 2
+            # All positive patches
+            mask[i, dye_idx[:, 0], dye_idx[:, 1]] = True
+            n_pos = len(dye_idx)
 
-            if pos_config == "centroid":
-                best = dists.argmin()
-                mask[i, dye_idx[best, 0], dye_idx[best, 1]] = True
-            elif pos_config == "half":
-                n_keep = max(1, len(dye_idx) // 2)
-                _, closest = dists.topk(n_keep, largest=False)
-                for j in closest:
-                    mask[i, dye_idx[j, 0], dye_idx[j, 1]] = True
-            else:  # "all"
-                mask[i, dye_idx[:, 0], dye_idx[:, 1]] = True
-
-            # 10× negatives scaled to positive count
-            n_pos = int(mask[i].sum())
             bg_idx = (targets[i] == 0).nonzero(as_tuple=False)
             if len(bg_idx) > 0:
-                n_sample = min(n_pos * N_NEG, len(bg_idx))
-                perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
-                sampled = bg_idx[perm]
-                mask[i, sampled[:, 0], sampled[:, 1]] = True
+                if neg_config == "all":
+                    mask[i, bg_idx[:, 0], bg_idx[:, 1]] = True
+                else:
+                    ratio = 2 if neg_config == "2x" else 10
+                    n_sample = min(n_pos * ratio, len(bg_idx))
+                    perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
+                    sampled = bg_idx[perm]
+                    mask[i, sampled[:, 0], sampled[:, 1]] = True
         else:
+            # No-dye tile: 10 random background patches
             bg_idx = (targets[i] == 0).nonzero(as_tuple=False)
             if len(bg_idx) > 0:
-                n_sample = min(N_NEG, len(bg_idx))
+                n_sample = min(10, len(bg_idx))
                 perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
                 sampled = bg_idx[perm]
                 mask[i, sampled[:, 0], sampled[:, 1]] = True
@@ -114,8 +104,8 @@ def _build_mask(targets, pos_config):
     return mask
 
 
-def run(seed: int, pos_config: str):
-    print(f"Pos sweep: config={pos_config} LR={LR} Seed={seed}")
+def run(seed: int, neg_config: str):
+    print(f"Neg sweep: config={neg_config} LR={LR} Seed={seed}")
     set_seed(seed)
 
     ds = load_dataset(HF_REPO, "sprayed", split="train")
@@ -149,7 +139,7 @@ def run(seed: int, pos_config: str):
 
             logits = model(images)
             ce = F.cross_entropy(logits, masks, reduction="none")
-            loss_mask = _build_mask(masks, pos_config)
+            loss_mask = _build_mask(masks, neg_config)
             selected = ce[loss_mask]
             loss = selected.mean() if len(selected) > 0 else ce.mean()
 
@@ -174,7 +164,7 @@ def run(seed: int, pos_config: str):
 
                 logits = model(images)
                 ce = F.cross_entropy(logits, masks, reduction="none")
-                loss_mask = _build_mask(masks, pos_config)
+                loss_mask = _build_mask(masks, neg_config)
                 selected = ce[loss_mask]
                 val_loss_total += (selected.mean() if len(selected) > 0 else ce.mean()).item() * images.size(0)
 
@@ -218,10 +208,10 @@ def run(seed: int, pos_config: str):
         "best_val_f1": best_val_f1,
         "lr": LR,
         "seed": seed,
-        "pos_config": pos_config,
+        "neg_config": neg_config,
         "model": "large",
     }
-    out_path = os.path.join(RESULTS_DIR, f"{pos_config}_seed={seed}.json")
+    out_path = os.path.join(RESULTS_DIR, f"{neg_config}_seed={seed}.json")
     save_results(results, out_path)
     print(f"Saved to {out_path}")
 
@@ -230,5 +220,5 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--idx", type=int, required=True)
     args = parser.parse_args()
-    seed, config_idx = divmod(args.idx, len(POS_CONFIGS))
-    run(seed=seed, pos_config=POS_CONFIGS[config_idx])
+    seed, config_idx = divmod(args.idx, len(NEG_CONFIGS))
+    run(seed=seed, neg_config=NEG_CONFIGS[config_idx])

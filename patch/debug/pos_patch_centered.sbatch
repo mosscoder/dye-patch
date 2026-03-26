@@ -5,12 +5,12 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --gres=gpu:1
-#SBATCH --exclude=babel-m5-32
+#SBATCH --exclude=babel-m5-32,babel-l5-16
 #SBATCH --time=2:00:00
 #SBATCH --output=/home/kdoherty/logs/dye_patch/debug/centroid/%A_%a.out
 #SBATCH --error=/home/kdoherty/logs/dye_patch/debug/centroid/%A_%a.err
 
-# 6 jobs: 2 seeds × 3 pos configs (centroid, half, all). Ternary, Large, CE, LR=5e-4, 30 epochs.
+# 6 jobs: 2 seeds × 3 neg ratios (2x, 10x, all). Ternary, all pos patches, Large, CE, LR=5e-4, 30 epochs.
 
 source ~/.bashrc
 mamba activate dye_patch
