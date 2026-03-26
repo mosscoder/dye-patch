@@ -36,12 +36,17 @@ from patch.utils.train import compute_spray_metrics, save_results, set_seed
 
 HF_REPO = "mpg-ranch/dye-patch"
 RESULTS_DIR = "patch/debug/results/neg_sweep"
-N_EPOCHS = 30
+N_EPOCHS = 50
 LR = 5e-4
 NUM_CLASSES = 3
 MODEL_NAME_LARGE = "facebook/dinov3-vitl16-pretrain-sat493m"
 
-NEG_CONFIGS = ["2x", "10x", "all"]
+CONFIGS = [
+    ("2x", 5e-4),
+    ("10x", 5e-4),
+    ("all", 5e-4),
+    ("all", 1e-3),
+]
 COLOR_TO_LABEL = {"red": 1, "blue": 2}
 
 
@@ -104,8 +109,8 @@ def _build_mask(targets, neg_config):
     return mask
 
 
-def run(seed: int, neg_config: str):
-    print(f"Neg sweep: config={neg_config} LR={LR} Seed={seed}")
+def run(seed: int, neg_config: str, lr: float):
+    print(f"Neg sweep: config={neg_config} LR={lr} Seed={seed}")
     set_seed(seed)
 
     ds = load_dataset(HF_REPO, "sprayed", split="train")
@@ -119,7 +124,7 @@ def run(seed: int, neg_config: str):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = create_model(model_name=MODEL_NAME_LARGE, num_classes=NUM_CLASSES, device=device)
-    optimizer = torch.optim.AdamW(model.get_trainable_parameters(), lr=LR, weight_decay=0.01)
+    optimizer = torch.optim.AdamW(model.get_trainable_parameters(), lr=lr, weight_decay=0.01)
 
     train_history = []
     val_history = []
@@ -206,12 +211,12 @@ def run(seed: int, neg_config: str):
         "val_history": val_history,
         "best_epoch": best_epoch,
         "best_val_f1": best_val_f1,
-        "lr": LR,
+        "lr": lr,
         "seed": seed,
         "neg_config": neg_config,
         "model": "large",
     }
-    out_path = os.path.join(RESULTS_DIR, f"{neg_config}_seed={seed}.json")
+    out_path = os.path.join(RESULTS_DIR, f"{neg_config}_lr={lr}_seed={seed}.json")
     save_results(results, out_path)
     print(f"Saved to {out_path}")
 
@@ -220,5 +225,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--idx", type=int, required=True)
     args = parser.parse_args()
-    seed, config_idx = divmod(args.idx, len(NEG_CONFIGS))
-    run(seed=seed, neg_config=NEG_CONFIGS[config_idx])
+    seed, config_idx = divmod(args.idx, len(CONFIGS))
+    neg_config, lr = CONFIGS[config_idx]
+    run(seed=seed, neg_config=neg_config, lr=lr)
