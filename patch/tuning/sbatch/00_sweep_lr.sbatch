@@ -2,7 +2,7 @@
 #SBATCH --job-name=dye_lr_sweep
 #SBATCH --partition=general
 #SBATCH --array=0-24
-#SBATCH --cpus-per-task=16
+#SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --gres=gpu:1
 #SBATCH --time=4:00:00
