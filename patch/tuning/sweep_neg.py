@@ -20,7 +20,7 @@ from patch.utils.models import create_model, save_head
 from patch.utils.train import PatchTrainer, collate_fn, save_results, set_seed
 
 RESULTS_DIR = "patch/tuning/results/neg"
-N_EPOCHS = 60
+N_EPOCHS = 100
 FIXED_LR = 0.0005
 
 
