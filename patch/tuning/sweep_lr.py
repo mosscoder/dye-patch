@@ -18,6 +18,7 @@ from patch.utils.dataset import DyePatchDataset, tuning_split
 from patch.utils.models import create_model, save_head
 from patch.utils.synthetic import SyntheticDyeOverlay
 from patch.utils.train import PatchTrainer, save_results, set_seed
+from patch.tuning.sweep_neg import select_best_neg
 
 RESULTS_DIR = "patch/tuning/results/lr"
 HF_REPO = "mpg-ranch/dye-patch"
@@ -79,8 +80,9 @@ def run_sweep(idx: int):
     val_loader = DataLoader(val_ds, batch_size=32, shuffle=False, collate_fn=collate_fn, num_workers=4)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    neg_mult = select_best_neg()
     model = create_model(device=device)
-    trainer = PatchTrainer(model, lr=lr, device=device)
+    trainer = PatchTrainer(model, lr=lr, neg_multiplier=neg_mult, device=device)
 
     results = trainer.train(train_loader, val_loader, epochs=N_EPOCHS)
     results["config"] = config

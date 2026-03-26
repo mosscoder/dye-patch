@@ -19,11 +19,12 @@ from patch.utils.config import LR_SEEDS, NEG_MULTIPLIERS
 from patch.utils.dataset import DyePatchDataset, tuning_split
 from patch.utils.models import create_model, save_head
 from patch.utils.train import PatchTrainer, save_results, set_seed
-from patch.tuning.sweep_lr import collate_fn, select_best_lr
+from patch.tuning.sweep_lr import collate_fn
 
 RESULTS_DIR = "patch/tuning/results/neg"
 HF_REPO = "mpg-ranch/dye-patch"
 N_EPOCHS = 30
+FIXED_LR = 0.0005
 
 
 def run_sweep(idx: int):
@@ -32,7 +33,7 @@ def run_sweep(idx: int):
 
     neg_mult = NEG_MULTIPLIERS[mult_idx]
     seed = LR_SEEDS[seed_idx]
-    lr = select_best_lr()
+    lr = FIXED_LR
 
     print(f"NegMult={neg_mult} LR={lr} Seed={seed}")
     set_seed(seed)
