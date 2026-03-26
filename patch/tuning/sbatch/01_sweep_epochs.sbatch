@@ -1,7 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=dye_epoch_full
-#SBATCH --partition=preempt
-#SBATCH --requeue
+#SBATCH --partition=general
 #SBATCH --array=0-19
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=32G

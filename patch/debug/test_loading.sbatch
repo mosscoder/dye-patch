@@ -1,7 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=dye_test_load
-#SBATCH --partition=preempt
-#SBATCH --requeue
+#SBATCH --partition=general
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
 #SBATCH --gres=gpu:1

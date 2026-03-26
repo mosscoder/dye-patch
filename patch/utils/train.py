@@ -12,7 +12,15 @@ import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
 
-from patch.utils.config import EVAL_CROP_OFFSET, FOCAL_ALPHA, FOCAL_GAMMA, NO_DYE_SAMPLE, WEIGHT_DECAY
+from patch.utils.config import (
+    BCE_SMOOTH_EPSILON,
+    EVAL_CROP_OFFSET,
+    FOCAL_ALPHA,
+    FOCAL_GAMMA,
+    LOSS_FN,
+    NO_DYE_SAMPLE,
+    WEIGHT_DECAY,
+)
 from patch.utils.dataset import generate_patch_labels
 
 
@@ -85,61 +93,73 @@ class PatchTrainer:
     device : torch.device or str
     """
 
-    def __init__(self, model, lr: float, weight_decay: float = WEIGHT_DECAY, device=None):
+    def __init__(self, model, lr: float, weight_decay: float = WEIGHT_DECAY,
+                 loss_fn: str = LOSS_FN, device=None):
         self.model = model
         self.device = device or next(model.parameters()).device
         self.optimizer = torch.optim.AdamW(
             model.get_trainable_parameters(), lr=lr, weight_decay=weight_decay
         )
+        self.loss_fn = loss_fn
         self.alpha = FOCAL_ALPHA
         self.gamma = FOCAL_GAMMA
 
-    def focal_loss(self, logits, targets):
-        """Focal loss with balanced patch sampling.
+    def _balanced_mask(self, targets):
+        """Build per-tile sampling mask for balanced patch loss.
 
-        For each tile in the batch:
-          - All dye patches are included.
-          - An equal number of background patches are randomly sampled.
-          - Tiles with no dye sample NO_DYE_SAMPLE background patches.
-        Remaining patches are masked out of the loss.
-
-        logits: [B, C, H, W]
-        targets: [B, H, W]
+        For each tile:
+          - All dye patches included + equal count of random background patches.
+          - No-dye tiles sample NO_DYE_SAMPLE background patches.
         """
-        ce = F.cross_entropy(logits, targets, reduction="none")  # [B, H, W]
-        pt = torch.exp(-ce)
-        alpha_t = torch.where(targets == 1, self.alpha, 1 - self.alpha)
-        focal = alpha_t * (1 - pt) ** self.gamma * ce  # [B, H, W]
-
-        # Build per-tile sampling mask
         B = targets.shape[0]
         mask = torch.zeros_like(targets, dtype=torch.bool)
 
         for i in range(B):
-            dye_idx = (targets[i] == 1).nonzero(as_tuple=False)  # [n_dye, 2]
+            dye_idx = (targets[i] == 1).nonzero(as_tuple=False)
             n_dye = len(dye_idx)
 
             if n_dye > 0:
-                # Include all dye patches
                 mask[i, dye_idx[:, 0], dye_idx[:, 1]] = True
-                # Sample equal number of background patches
                 bg_idx = (targets[i] == 0).nonzero(as_tuple=False)
                 n_sample = min(n_dye, len(bg_idx))
                 perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
                 sampled = bg_idx[perm]
                 mask[i, sampled[:, 0], sampled[:, 1]] = True
             else:
-                # No dye: sample fixed number of background patches
                 bg_idx = (targets[i] == 0).nonzero(as_tuple=False)
                 n_sample = min(NO_DYE_SAMPLE, len(bg_idx))
                 perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
                 sampled = bg_idx[perm]
                 mask[i, sampled[:, 0], sampled[:, 1]] = True
 
-        # Mean over selected patches only
-        selected = focal[mask]
+        return mask
+
+    def compute_loss(self, logits, targets):
+        """Compute loss with balanced patch sampling.
+
+        logits: [B, C, H, W]
+        targets: [B, H, W]
+        """
+        mask = self._balanced_mask(targets)
+
+        if self.loss_fn == "focal":
+            ce = F.cross_entropy(logits, targets, reduction="none")
+            pt = torch.exp(-ce)
+            alpha_t = torch.where(targets == 1, self.alpha, 1 - self.alpha)
+            per_patch = alpha_t * (1 - pt) ** self.gamma * ce
+        elif self.loss_fn == "bce_smooth":
+            ce = F.cross_entropy(
+                logits, targets, reduction="none",
+                label_smoothing=BCE_SMOOTH_EPSILON,
+            )
+            per_patch = ce
+        else:  # "bce"
+            ce = F.cross_entropy(logits, targets, reduction="none")
+            per_patch = ce
+
+        selected = per_patch[mask]
         if len(selected) == 0:
-            return focal.mean()  # fallback
+            return per_patch.mean()
         return selected.mean()
 
     def train_epoch(self, loader):
@@ -160,7 +180,7 @@ class PatchTrainer:
             masks = masks.to(self.device).long()
 
             logits = self.model(images)  # [B, C, 24, 24]
-            loss = self.focal_loss(logits, masks)
+            loss = self.compute_loss(logits, masks)
 
             self.optimizer.zero_grad()
             loss.backward()
@@ -195,7 +215,7 @@ class PatchTrainer:
             masks = masks.to(self.device).long()
 
             logits = self.model(images)
-            loss = self.focal_loss(logits, masks)
+            loss = self.compute_loss(logits, masks)
 
             total_loss += loss.item() * images.size(0)
             preds = logits.argmax(dim=1)
