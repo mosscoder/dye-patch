@@ -61,11 +61,9 @@ LR_GRID = [0.000025, 0.00005, 0.0001, 0.0002, 0.0004]
 LR_SEEDS = [0, 1, 2, 3, 4]
 WEIGHT_DECAY = 0.01
 
-# Loss function
-LOSS_FN = "focal"  # "focal", "bce", or "bce_smooth"
+# Focal loss with balanced patch sampling
 FOCAL_GAMMA = 2.0
 FOCAL_ALPHA = 0.25  # weight for dye (positive) class; background gets 1 - alpha
-BCE_SMOOTH_EPSILON = 0.1  # label smoothing factor for bce_smooth
 NO_DYE_SAMPLE = 13  # background patches per no-dye tile (mean of 1 and 25 spray patch counts)
 
 # =============================================================================
