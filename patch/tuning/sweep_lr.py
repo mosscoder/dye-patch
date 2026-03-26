@@ -20,7 +20,7 @@ from patch.utils.train import PatchTrainer, collate_fn, save_results, set_seed
 from patch.tuning.sweep_neg import select_best_neg
 
 RESULTS_DIR = "patch/tuning/results/lr"
-N_EPOCHS = 30
+N_EPOCHS = 50
 
 
 def get_overlay_for_config(config: str) -> SyntheticDyeOverlay | None:
