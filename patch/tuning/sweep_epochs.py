@@ -32,6 +32,7 @@ RESULTS_DIR = "patch/tuning/results/epochs"
 HF_REPO = "mpg-ranch/dye-patch"
 MAX_EPOCHS = 50
 N_FOLDS = 5
+N_FOLDS_TEMPORAL = 4
 
 
 def load_best_overlay(config: str) -> SyntheticDyeOverlay | None:
@@ -134,8 +135,9 @@ def select_best_epoch(config: str, train_month: str | None = None) -> int:
     else:
         result_dir = os.path.join(RESULTS_DIR, "temporal", config, train_month)
 
+    n_folds = N_FOLDS_TEMPORAL if train_month is not None else N_FOLDS
     all_val_f1s = []
-    for fold in range(N_FOLDS):
+    for fold in range(n_folds):
         path = os.path.join(result_dir, f"fold={fold}.json")
         if not os.path.exists(path):
             continue
@@ -176,7 +178,7 @@ def _get_single_month_data(config: str, train_month: str):
 
 def run_temporal(idx: int):
     """Run one (config, month, fold) for temporal holdout epoch tuning."""
-    config_month_idx, fold_idx = divmod(idx, N_FOLDS)
+    config_month_idx, fold_idx = divmod(idx, N_FOLDS_TEMPORAL)
     config_idx, month_idx = divmod(config_month_idx, len(MONTHS))
     config = CONFIGS[config_idx]
     train_month = MONTHS[month_idx]

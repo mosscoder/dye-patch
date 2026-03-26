@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=dye_loss_cmp
 #SBATCH --partition=general
-#SBATCH --array=0-2
+#SBATCH --array=0-5
 #SBATCH --cpus-per-task=16
 #SBATCH --mem=32G
 #SBATCH --gres=gpu:1
@@ -9,8 +9,7 @@
 #SBATCH --output=/home/kdoherty/logs/dye_patch/debug/loss_fn/%A_%a.out
 #SBATCH --error=/home/kdoherty/logs/dye_patch/debug/loss_fn/%A_%a.err
 
-# 3 jobs: 0=focal, 1=bce, 2=bce_smooth
-# Same LR (0.0001), seed (0), 15 epochs
+# 6 jobs: 3 loss fns × 2 LRs (1e-3, 1e-4), seed=0, 15 epochs
 
 source ~/.bashrc
 mamba activate dye_patch

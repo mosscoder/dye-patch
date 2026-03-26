@@ -1,19 +1,19 @@
 """
-Quick comparison of loss functions: focal, bce, bce_smooth.
+Quick comparison of loss functions: focal, bce, bce_smooth at two LRs.
 
-Runs one seed (0), one LR (0.0001), 15 epochs for each loss function.
-Saves results to patch/debug/results/loss_fn/{loss_fn}.json.
+6 jobs = 3 loss functions × 2 LRs (1e-3, 1e-4), seed=0, 15 epochs.
+Index mapping: divmod(idx, 2) → (loss_fn_idx, lr_idx)
 
-SLURM array: --array=0-2 (one job per loss function)
+SLURM array: --array=0-5
 
 Usage:
-  python -u -m patch.debug.check_loss_fn --idx 0  # focal
-  python -u -m patch.debug.check_loss_fn --idx 1  # bce
-  python -u -m patch.debug.check_loss_fn --idx 2  # bce_smooth
+  python -u -m patch.debug.check_loss_fn --idx 0  # focal, lr=1e-3
+  python -u -m patch.debug.check_loss_fn --idx 1  # focal, lr=1e-4
+  python -u -m patch.debug.check_loss_fn --idx 2  # bce,   lr=1e-3
+  ...
 """
 
 import argparse
-import json
 import os
 
 import torch
@@ -26,10 +26,10 @@ from patch.utils.train import PatchTrainer, save_results, set_seed
 
 HF_REPO = "mpg-ranch/dye-patch"
 RESULTS_DIR = "patch/debug/results/loss_fn"
-LR = 0.0001
 SEED = 0
 N_EPOCHS = 15
 LOSS_FNS = ["focal", "bce", "bce_smooth"]
+LRS = [1e-3, 1e-4]
 
 
 def collate_fn(batch):
@@ -40,8 +40,11 @@ def collate_fn(batch):
 
 
 def run(idx: int):
-    loss_fn = LOSS_FNS[idx]
-    print(f"Loss={loss_fn} LR={LR} Seed={SEED}")
+    loss_idx, lr_idx = divmod(idx, len(LRS))
+    loss_fn = LOSS_FNS[loss_idx]
+    lr = LRS[lr_idx]
+
+    print(f"Loss={loss_fn} LR={lr} Seed={SEED}")
     set_seed(SEED)
 
     ds = load_dataset(HF_REPO, "sprayed", split="train")
@@ -55,20 +58,20 @@ def run(idx: int):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = create_model(device=device)
-    trainer = PatchTrainer(model, lr=LR, loss_fn=loss_fn, device=device)
+    trainer = PatchTrainer(model, lr=lr, loss_fn=loss_fn, device=device)
 
     results = trainer.train(train_loader, val_loader, epochs=N_EPOCHS)
     results["loss_fn"] = loss_fn
-    results["lr"] = LR
+    results["lr"] = lr
     results["seed"] = SEED
 
-    out_path = os.path.join(RESULTS_DIR, f"{loss_fn}.json")
+    out_path = os.path.join(RESULTS_DIR, f"{loss_fn}_lr={lr}.json")
     save_results(results, out_path)
     print(f"Saved to {out_path}")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--idx", type=int, required=True, help="0=focal, 1=bce, 2=bce_smooth")
+    parser.add_argument("--idx", type=int, required=True)
     args = parser.parse_args()
     run(args.idx)
