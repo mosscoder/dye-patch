@@ -21,6 +21,7 @@ from patch.utils.models import create_model, save_head
 from patch.utils.train import PatchTrainer, save_results, set_seed
 from patch.tuning.sweep_epochs import load_best_overlay, select_best_epoch
 from patch.tuning.sweep_lr import collate_fn, select_best_lr
+from patch.tuning.sweep_neg import select_best_neg
 from patch.eval.data_source import compute_spray_metrics
 
 RESULTS_DIR = "patch/eval/results/temporal"
@@ -67,6 +68,7 @@ def run_holdout(idx: int):
     set_seed(seed)
 
     lr = select_best_lr(config)
+    neg_mult = select_best_neg()
     overlay = load_best_overlay(config)
     n_epochs = select_best_epoch(config, train_month=train_month)
 
@@ -84,7 +86,7 @@ def run_holdout(idx: int):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = create_model(device=device)
-    trainer = PatchTrainer(model, lr=lr, device=device)
+    trainer = PatchTrainer(model, lr=lr, neg_multiplier=neg_mult, device=device)
 
     for epoch in range(1, n_epochs + 1):
         metrics = trainer.train_epoch(train_loader)

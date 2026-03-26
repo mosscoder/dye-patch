@@ -17,9 +17,9 @@ from torch.utils.data import Dataset
 from sklearn.model_selection import train_test_split
 
 from patch.utils.config import (
+    COLOR_TO_LABEL,
     GSD_M,
     GRID_DIM,
-    LABEL_DYE,
     MODEL_INPUT_SIZE,
     MONTHS,
     PRECROP_SIZE,
@@ -57,15 +57,15 @@ def generate_patch_labels(
     spray_size_m : float
         Physical side length of the spray patch (0.1 or 0.5 m).
     spray_color : str
-        "red", "blue", or "none". Color is used only to determine if dye
-        is present — the label is binary (0=none, 1=dye).
+        "red", "blue", or "none". Determines the label value:
+        0=none, 1=red, 2=blue.
     """
     mask = np.zeros((grid_dim, grid_dim), dtype=np.int8)
 
-    if spray_size_m <= 0 or spray_color == "none":
+    if spray_size_m <= 0 or spray_color not in COLOR_TO_LABEL:
         return mask
 
-    label = LABEL_DYE
+    label = COLOR_TO_LABEL[spray_color]
     half_px = spray_size_m / (2 * gsd_m)
 
     # Spray is always centered in the 512px pre-crop

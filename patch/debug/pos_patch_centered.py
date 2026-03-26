@@ -22,7 +22,8 @@ from datasets import load_dataset
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from patch.utils.config import FOCAL_ALPHA, FOCAL_GAMMA
+FOCAL_ALPHA = 0.25
+FOCAL_GAMMA = 2.0
 from patch.utils.dataset import DyePatchDataset, stratified_split
 from patch.utils.models import create_model
 from patch.utils.train import compute_spray_metrics, save_results, set_seed

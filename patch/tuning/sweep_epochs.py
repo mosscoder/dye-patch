@@ -27,12 +27,13 @@ from patch.utils.models import create_model
 from patch.utils.synthetic import SyntheticDyeOverlay
 from patch.utils.train import PatchTrainer, save_results, set_seed
 from patch.tuning.sweep_lr import collate_fn, select_best_lr
+from patch.tuning.sweep_neg import select_best_neg
 
 RESULTS_DIR = "patch/tuning/results/epochs"
 HF_REPO = "mpg-ranch/dye-patch"
-MAX_EPOCHS = 50
-N_FOLDS = 5
-N_FOLDS_TEMPORAL = 4
+MAX_EPOCHS = 30
+N_FOLDS = 3
+N_FOLDS_TEMPORAL = 3
 
 
 def load_best_overlay(config: str) -> SyntheticDyeOverlay | None:
@@ -83,6 +84,7 @@ def _train_fold(ds, fold_idx: int, config: str, out_dir: str, extra_meta: dict =
     set_seed(fold_idx)
 
     lr = select_best_lr(config)
+    neg_mult = select_best_neg()
     overlay = load_best_overlay(config)
 
     fold_train, fold_val = _kfold_split(ds, fold_idx)
@@ -95,7 +97,7 @@ def _train_fold(ds, fold_idx: int, config: str, out_dir: str, extra_meta: dict =
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = create_model(device=device)
-    trainer = PatchTrainer(model, lr=lr, device=device)
+    trainer = PatchTrainer(model, lr=lr, neg_multiplier=neg_mult, device=device)
 
     results = trainer.train(train_loader, val_loader, epochs=MAX_EPOCHS)
     results["config"] = config

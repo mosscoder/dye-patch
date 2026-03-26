@@ -1,8 +1,8 @@
 """
-Learning rate grid search across configs and seeds.
+Learning rate grid search on real_only data.
 
-SLURM array: --array=0-24 (5 LRs × 5 seeds = 25 jobs)
-Index mapping: divmod(idx, 5) → (lr_idx, seed)
+SLURM array: --array=0-14 (5 LRs × 3 seeds = 15 jobs)
+Index mapping: divmod(idx, 3) → (lr_idx, seed)
 """
 
 import argparse
@@ -21,7 +21,7 @@ from patch.utils.train import PatchTrainer, save_results, set_seed
 
 RESULTS_DIR = "patch/tuning/results/lr"
 HF_REPO = "mpg-ranch/dye-patch"
-N_EPOCHS = 15
+N_EPOCHS = 30
 
 
 def collate_fn(batch):

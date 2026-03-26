@@ -12,7 +12,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm
 
-from patch.utils.config import EVAL_CROP_OFFSET, FOCAL_ALPHA, FOCAL_GAMMA, NO_DYE_SAMPLE, WEIGHT_DECAY
+from patch.utils.config import EVAL_CROP_OFFSET, NEG_MULTIPLIER, NO_DYE_NEG_SAMPLE, WEIGHT_DECAY
 from patch.utils.dataset import generate_patch_labels
 
 
@@ -28,8 +28,8 @@ def set_seed(seed: int):
 def compute_spray_metrics(preds, metadata_list):
     """Compute super-patch F1 from predictions and metadata dicts.
 
-    Same logic as data_source.compute_spray_metrics but accepts a list of
-    metadata dicts (from DataLoader collate) instead of an HF dataset.
+    Color-agnostic: any pred > 0 counts as dye (works for both binary
+    and ternary classification).
 
     Super-patch (spray zone): one binary verdict per sprayed tile.
       TP: ANY patch in spray bounds predicts dye.
@@ -75,71 +75,69 @@ def compute_spray_metrics(preds, metadata_list):
 
 
 class PatchTrainer:
-    """Train a DyePatchModel with per-patch cross-entropy loss.
+    """Train a DyePatchModel with per-patch cross-entropy loss and balanced sampling.
 
     Parameters
     ----------
     model : DyePatchModel
     lr : float
+    neg_multiplier : int
+        Number of negative patches per positive patch in the loss mask.
     weight_decay : float
     device : torch.device or str
     """
 
-    def __init__(self, model, lr: float, weight_decay: float = WEIGHT_DECAY, device=None):
+    def __init__(self, model, lr: float, neg_multiplier: int = NEG_MULTIPLIER,
+                 weight_decay: float = WEIGHT_DECAY, device=None):
         self.model = model
         self.device = device or next(model.parameters()).device
         self.optimizer = torch.optim.AdamW(
             model.get_trainable_parameters(), lr=lr, weight_decay=weight_decay
         )
-        self.alpha = FOCAL_ALPHA
-        self.gamma = FOCAL_GAMMA
+        self.neg_multiplier = neg_multiplier
 
-    def focal_loss(self, logits, targets):
-        """Focal loss with balanced patch sampling.
+    def _balanced_mask(self, targets):
+        """Build per-tile loss mask: all dye patches + neg_multiplier × n_pos background.
 
-        For each tile in the batch:
-          - All dye patches are included.
-          - An equal number of background patches are randomly sampled.
-          - Tiles with no dye sample NO_DYE_SAMPLE background patches.
-        Remaining patches are masked out of the loss.
-
-        logits: [B, C, H, W]
-        targets: [B, H, W]
+        Works for ternary targets (dye = targets > 0).
+        No-dye tiles sample NO_DYE_NEG_SAMPLE background patches.
         """
-        ce = F.cross_entropy(logits, targets, reduction="none")  # [B, H, W]
-        pt = torch.exp(-ce)
-        alpha_t = torch.where(targets == 1, self.alpha, 1 - self.alpha)
-        focal = alpha_t * (1 - pt) ** self.gamma * ce  # [B, H, W]
-
-        # Build per-tile sampling mask
         B = targets.shape[0]
         mask = torch.zeros_like(targets, dtype=torch.bool)
 
         for i in range(B):
-            dye_idx = (targets[i] == 1).nonzero(as_tuple=False)  # [n_dye, 2]
+            dye_idx = (targets[i] > 0).nonzero(as_tuple=False)
             n_dye = len(dye_idx)
 
             if n_dye > 0:
-                # Include all dye patches
                 mask[i, dye_idx[:, 0], dye_idx[:, 1]] = True
-                # Sample equal number of background patches
                 bg_idx = (targets[i] == 0).nonzero(as_tuple=False)
-                n_sample = min(n_dye, len(bg_idx))
-                perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
-                sampled = bg_idx[perm]
-                mask[i, sampled[:, 0], sampled[:, 1]] = True
+                if len(bg_idx) > 0:
+                    n_sample = min(n_dye * self.neg_multiplier, len(bg_idx))
+                    perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
+                    sampled = bg_idx[perm]
+                    mask[i, sampled[:, 0], sampled[:, 1]] = True
             else:
-                # No dye: sample fixed number of background patches
                 bg_idx = (targets[i] == 0).nonzero(as_tuple=False)
-                n_sample = min(NO_DYE_SAMPLE, len(bg_idx))
-                perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
-                sampled = bg_idx[perm]
-                mask[i, sampled[:, 0], sampled[:, 1]] = True
+                if len(bg_idx) > 0:
+                    n_sample = min(NO_DYE_NEG_SAMPLE, len(bg_idx))
+                    perm = torch.randperm(len(bg_idx), device=targets.device)[:n_sample]
+                    sampled = bg_idx[perm]
+                    mask[i, sampled[:, 0], sampled[:, 1]] = True
 
-        # Mean over selected patches only
-        selected = focal[mask]
+        return mask
+
+    def compute_loss(self, logits, targets):
+        """Cross-entropy on balanced patch mask.
+
+        logits: [B, C, H, W]
+        targets: [B, H, W]
+        """
+        ce = F.cross_entropy(logits, targets, reduction="none")
+        mask = self._balanced_mask(targets)
+        selected = ce[mask]
         if len(selected) == 0:
-            return focal.mean()  # fallback
+            return ce.mean()
         return selected.mean()
 
     def train_epoch(self, loader):
@@ -148,7 +146,6 @@ class PatchTrainer:
         Returns dict with 'loss' and 'accuracy' (patch-level).
         """
         self.model.train()
-        # Keep backbone in eval mode (frozen BatchNorm etc.)
         self.model.backbone.eval()
 
         total_loss = 0.0
@@ -159,15 +156,15 @@ class PatchTrainer:
             images = images.to(self.device)
             masks = masks.to(self.device).long()
 
-            logits = self.model(images)  # [B, C, 24, 24]
-            loss = self.focal_loss(logits, masks)
+            logits = self.model(images)
+            loss = self.compute_loss(logits, masks)
 
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
 
             total_loss += loss.item() * images.size(0)
-            preds = logits.argmax(dim=1)  # [B, 24, 24]
+            preds = logits.argmax(dim=1)
             correct += (preds == masks).sum().item()
             total += masks.numel()
 
@@ -195,7 +192,7 @@ class PatchTrainer:
             masks = masks.to(self.device).long()
 
             logits = self.model(images)
-            loss = self.focal_loss(logits, masks)
+            loss = self.compute_loss(logits, masks)
 
             total_loss += loss.item() * images.size(0)
             preds = logits.argmax(dim=1)
@@ -238,7 +235,6 @@ class PatchTrainer:
             train_metrics = self.train_epoch(train_loader)
             val_metrics = self.validate_epoch(val_loader)
 
-            # Drop non-serialisable tensors from history
             val_record = {k: v for k, v in val_metrics.items() if k not in ("preds", "labels")}
 
             train_history.append(train_metrics)
@@ -263,7 +259,6 @@ class PatchTrainer:
                     f"R={val_metrics['recall']:.4f}{star}"
                 )
 
-        # Restore best model
         if best_state is not None:
             self.model.classifier.load_state_dict(best_state)
 

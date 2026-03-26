@@ -21,9 +21,9 @@ EVAL_CROP_OFFSET = (PRECROP_SIZE - MODEL_INPUT_SIZE) // 2  # 64px centre crop of
 # =============================================================================
 # Model
 # =============================================================================
-MODEL_NAME = "facebook/dinov3-vit7b16-pretrain-sat493m"
-NUM_CLASSES = 2  # binary: 0=none, 1=dye
-# Normalization stats from AutoImageProcessor for dinov3-vit7b16-pretrain-sat493m
+MODEL_NAME = "facebook/dinov3-vitl16-pretrain-sat493m"
+NUM_CLASSES = 3  # ternary: 0=none, 1=red, 2=blue
+# Normalization stats from AutoImageProcessor (satellite-pretrained)
 NORM_MEAN = [0.430, 0.411, 0.296]
 NORM_STD = [0.213, 0.156, 0.143]
 
@@ -31,8 +31,9 @@ NORM_STD = [0.213, 0.156, 0.143]
 # Labels
 # =============================================================================
 LABEL_NONE = 0
-LABEL_DYE = 1
-# Overlay color names (for HSV delta selection, not classification labels)
+LABEL_RED = 1
+LABEL_BLUE = 2
+COLOR_TO_LABEL = {"red": LABEL_RED, "blue": LABEL_BLUE}
 DYE_COLORS = ["red", "blue"]
 
 # =============================================================================
@@ -57,14 +58,16 @@ AUG_CONTRAST = 0.15
 # =============================================================================
 # Learning rate sweep
 # =============================================================================
-LR_GRID = [0.000025, 0.00005, 0.0001, 0.0002, 0.0004]
-LR_SEEDS = [0, 1, 2, 3, 4]
+LR_GRID = [0.000125, 0.00025, 0.0005, 0.001, 0.002]
+LR_SEEDS = [0, 1, 2]
 WEIGHT_DECAY = 0.01
 
-# Focal loss with balanced patch sampling
-FOCAL_GAMMA = 2.0
-FOCAL_ALPHA = 0.25  # weight for dye (positive) class; background gets 1 - alpha
-NO_DYE_SAMPLE = 13  # background patches per no-dye tile (mean of 1 and 25 spray patch counts)
+# =============================================================================
+# Negative sampling
+# =============================================================================
+NEG_MULTIPLIER = 10  # default neg:pos ratio (swept in 00b_sweep_neg)
+NEG_MULTIPLIERS = [2, 4, 8, 16]  # sweep grid
+NO_DYE_NEG_SAMPLE = 10  # fixed neg count for tiles with no dye
 
 # =============================================================================
 # Training configs
@@ -79,11 +82,3 @@ TUNING_TEST_FRAC = 0.3  # 70/30 train/test
 # Eval
 EVAL_SEED = 0
 MONTHS = ["may", "july", "october"]
-
-# =============================================================================
-# SLURM
-# =============================================================================
-SLURM_PARTITION = "preempt"
-SLURM_CPUS = 16
-SLURM_MEM = "32G"
-SLURM_GPU = 1

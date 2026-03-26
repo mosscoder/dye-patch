@@ -1,16 +1,17 @@
 #!/bin/bash
 #SBATCH --job-name=dye_epoch_temporal
 #SBATCH --partition=general
-#SBATCH --array=0-47
+#SBATCH --array=0-35
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --gres=gpu:1
+#SBATCH --exclude=babel-m5-32,babel-l5-16
 #SBATCH --time=4:00:00
 #SBATCH --output=/home/kdoherty/logs/dye_patch/tuning/epochs_temporal/%A_%a.out
 #SBATCH --error=/home/kdoherty/logs/dye_patch/tuning/epochs_temporal/%A_%a.err
 
-# 48 jobs = 4 configs × 3 months × 4 folds (single-month epoch tuning for temporal_holdout.py)
-# Index: divmod(idx, 4) → (config_month, fold)
+# 36 jobs = 4 configs × 3 months × 3 folds (single-month epoch tuning for temporal_holdout.py)
+# Index: divmod(idx, 3) → (config_month, fold)
 #        divmod(config_month, 3) → (config, month)
 
 source ~/.bashrc

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=dye_epoch_full
+#SBATCH --job-name=dye_neg_sweep
 #SBATCH --partition=general
 #SBATCH --array=0-11
 #SBATCH --cpus-per-task=8
@@ -7,11 +7,11 @@
 #SBATCH --gres=gpu:1
 #SBATCH --exclude=babel-m5-32,babel-l5-16
 #SBATCH --time=4:00:00
-#SBATCH --output=/home/kdoherty/logs/dye_patch/tuning/epochs_full/%A_%a.out
-#SBATCH --error=/home/kdoherty/logs/dye_patch/tuning/epochs_full/%A_%a.err
+#SBATCH --output=/home/kdoherty/logs/dye_patch/tuning/neg/%A_%a.out
+#SBATCH --error=/home/kdoherty/logs/dye_patch/tuning/neg/%A_%a.err
 
-# 12 jobs = 4 configs × 3 folds (full-data epoch tuning for data_source.py)
-# Index: divmod(idx, 3) → (config, fold)
+# 12 jobs = 4 neg multipliers × 3 seeds
+# Index mapping: divmod(idx, 3) → (mult_idx, seed)
 
 source ~/.bashrc
 mamba activate dye_patch
@@ -20,10 +20,10 @@ export HF_HOME=/data/hf_cache
 export HF_DATASETS_OFFLINE=1
 export TMPDIR=/scratch/kdoherty && mkdir -p $TMPDIR
 
-mkdir -p /home/kdoherty/logs/dye_patch/tuning/epochs_full
+mkdir -p /home/kdoherty/logs/dye_patch/tuning/neg
 
 echo "Job ID: $SLURM_JOB_ID"
 echo "Array Task ID: $SLURM_ARRAY_TASK_ID"
 echo "Node: $SLURMD_NODENAME"
 
-python -u -m patch.tuning.sweep_epochs --mode full --idx $SLURM_ARRAY_TASK_ID
+python -u -m patch.tuning.sweep_neg --idx $SLURM_ARRAY_TASK_ID

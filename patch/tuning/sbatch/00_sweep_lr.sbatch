@@ -1,16 +1,17 @@
 #!/bin/bash
 #SBATCH --job-name=dye_lr_sweep
 #SBATCH --partition=general
-#SBATCH --array=0-24
+#SBATCH --array=0-14
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --gres=gpu:1
+#SBATCH --exclude=babel-m5-32,babel-l5-16
 #SBATCH --time=4:00:00
 #SBATCH --output=/home/kdoherty/logs/dye_patch/tuning/lr/%A_%a.out
 #SBATCH --error=/home/kdoherty/logs/dye_patch/tuning/lr/%A_%a.err
 
-# 20 jobs = 4 LRs × 5 seeds (real_only data, shared across all configs)
-# Index mapping: divmod(idx, 5) → (lr_idx, seed)
+# 15 jobs = 5 LRs × 3 seeds (real_only data, shared across all configs)
+# Index mapping: divmod(idx, 3) → (lr_idx, seed)
 
 source ~/.bashrc
 mamba activate dye_patch

@@ -20,9 +20,9 @@ import numpy as np
 
 from patch.utils.config import (
     BLOB_SIZE_RANGE_PX,
+    COLOR_TO_LABEL,
     DYE_COLORS,
     GRID_DIM,
-    LABEL_DYE,
     VIT_PATCH_SIZE,
 )
 
@@ -162,10 +162,10 @@ class SyntheticDyeOverlay:
         image : np.ndarray
             RGB image, shape (H, W, 3), dtype uint8 or float32 [0-1].
         label_mask : np.ndarray
-            Existing 24x24 label mask (0=none, 1=dye).
+            Existing 24x24 label mask (0=none, 1=red, 2=blue).
         color_name : str or None
             "red" or "blue" — selects which HSV deltas to use.
-            If None, picks randomly. Labels are binary regardless.
+            If None, picks randomly. Labels are ternary (0/1/2).
 
         Returns
         -------
@@ -204,7 +204,7 @@ class SyntheticDyeOverlay:
         fm = final_mask[:GRID_DIM * VIT_PATCH_SIZE, :GRID_DIM * VIT_PATCH_SIZE]
         fm = fm.reshape(GRID_DIM, VIT_PATCH_SIZE, GRID_DIM, VIT_PATCH_SIZE)
         patch_hits = fm.any(axis=(1, 3))
-        label_mask[patch_hits] = LABEL_DYE
+        label_mask[patch_hits] = COLOR_TO_LABEL[color_name]
 
         if not is_float:
             image = (np.clip(image, 0, 1) * 255).astype(np.uint8)
