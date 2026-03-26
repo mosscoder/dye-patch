@@ -13,71 +13,19 @@ import torch
 from datasets import load_dataset
 from torch.utils.data import DataLoader
 
-from patch.utils.config import CONFIGS, EVAL_CROP_OFFSET, EVAL_SEED
-from patch.utils.dataset import DyePatchDataset, generate_patch_labels
+from patch.utils.config import CONFIGS, EVAL_SEED, HF_REPO
+from patch.utils.dataset import DyePatchDataset
 from patch.utils.models import create_model, save_head
 from patch.utils.synthetic import SyntheticDyeOverlay
-from patch.utils.train import PatchTrainer, save_results, set_seed
-from patch.tuning.sweep_epochs import get_train_data_for_config, load_best_overlay, select_best_epoch
-from patch.tuning.sweep_lr import collate_fn, select_best_lr
+from patch.utils.train import PatchTrainer, compute_spray_metrics, save_results, set_seed
+from patch.utils.dataset import get_train_data_for_config
+from patch.tuning.sweep_epochs import load_best_overlay, select_best_epoch
+from patch.utils.train import collate_fn
+from patch.tuning.sweep_lr import select_best_lr
 from patch.tuning.sweep_neg import select_best_neg
 
 RESULTS_DIR = "patch/eval/results/data_source"
-HF_REPO = "mpg-ranch/dye-patch"
 
-
-def compute_spray_metrics(preds, test_dataset):
-    """Compute super-patch evaluation metrics.
-
-    Super-patch (spray zone): collapses to one binary verdict per sprayed tile.
-      TP: ANY patch in spray bounds predicts dye (label > 0, color-agnostic).
-      FN: NO patch in spray bounds predicts dye.
-
-    Peripheral patches (outside spray bounds on all tiles):
-      FP: individual patches that predict dye where there is none.
-      TN: individual patches that correctly predict none.
-
-    Precision/recall/F1 computed directly from these counts.
-    """
-    tp = fn = 0
-    fp = tn = 0
-    center_offset = EVAL_CROP_OFFSET
-
-    for i in range(len(test_dataset)):
-        row = test_dataset[i]
-        pred = preds[i].numpy() if hasattr(preds[i], 'numpy') else preds[i]
-
-        # Generate spray mask (all zeros for non-sprayed tiles)
-        mask = generate_patch_labels(
-            crop_offset=(center_offset, center_offset),
-            spray_size_m=row.get("spray_size_m", 0.0),
-            spray_color=row.get("color", "none"),
-        )
-        spray_patches = mask > 0
-        peripheral_patches = ~spray_patches
-
-        # Super-patch: spray zone verdict
-        if spray_patches.any():
-            if (pred[spray_patches] > 0).any():
-                tp += 1
-            else:
-                fn += 1
-
-        # Peripheral patches: individual FP/TN counts
-        periph_preds = pred[peripheral_patches]
-        fp += int((periph_preds > 0).sum())
-        tn += int((periph_preds == 0).sum())
-
-    precision = tp / max(tp + fp, 1)
-    recall = tp / max(tp + fn, 1)
-    f1 = 2 * precision * recall / max(precision + recall, 1e-8)
-
-    return {
-        "tp": tp, "fp": fp, "fn": fn, "tn": tn,
-        "precision": precision, "recall": recall, "f1": f1,
-        "n_sprayed_tiles": tp + fn,
-        "n_peripheral_patches": fp + tn,
-    }
 
 
 def run_eval(idx: int):

@@ -20,6 +20,7 @@ from patch.utils.config import (
     COLOR_TO_LABEL,
     GSD_M,
     GRID_DIM,
+    HF_REPO,
     MODEL_INPUT_SIZE,
     MONTHS,
     PRECROP_SIZE,
@@ -188,6 +189,27 @@ class DyePatchDataset(Dataset):
         tensor = self.post_transform(image)
 
         return tensor, torch.from_numpy(mask).long(), metadata
+
+
+# =============================================================================
+# Data loading
+# =============================================================================
+
+def get_train_data_for_config(config: str):
+    """Load full training split for a config."""
+    from datasets import load_dataset, concatenate_datasets
+
+    if config == "real_only":
+        return load_dataset(HF_REPO, "sprayed", split="train")
+    elif config == "hybrid":
+        sprayed = load_dataset(HF_REPO, "sprayed", split="train")
+        annex = load_dataset(HF_REPO, "unsprayed_annex", split="train")
+        return concatenate_datasets([sprayed, annex])
+    elif config == "synth_local":
+        return load_dataset(HF_REPO, "unsprayed_annex", split="train")
+    elif config == "synth_offsite":
+        return load_dataset(HF_REPO, "offsite", split="train")
+    return load_dataset(HF_REPO, "sprayed", split="train")
 
 
 # =============================================================================

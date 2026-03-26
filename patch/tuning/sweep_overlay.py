@@ -21,9 +21,7 @@ import random
 import numpy as np
 from datasets import load_dataset
 
-from patch.utils.config import GSD_M, GRID_DIM, PRECROP_SIZE, VIT_PATCH_SIZE
-
-HF_REPO = "mpg-ranch/dye-patch"
+from patch.utils.config import GSD_M, GRID_DIM, HF_REPO, PRECROP_SIZE, VIT_PATCH_SIZE
 RESULTS_DIR = "patch/tuning/results/overlay"
 SEED = 42
 

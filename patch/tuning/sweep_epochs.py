@@ -21,16 +21,16 @@ from datasets import load_dataset
 from sklearn.model_selection import KFold, StratifiedKFold
 from torch.utils.data import DataLoader
 
-from patch.utils.config import CONFIGS, MONTHS
-from patch.utils.dataset import DyePatchDataset, _get_point_strata, _point_indices
+from patch.utils.config import CONFIGS, HF_REPO, MONTHS
+from patch.utils.dataset import DyePatchDataset, _get_point_strata, _point_indices, get_train_data_for_config
 from patch.utils.models import create_model
 from patch.utils.synthetic import SyntheticDyeOverlay
 from patch.utils.train import PatchTrainer, save_results, set_seed
-from patch.tuning.sweep_lr import collate_fn, select_best_lr
+from patch.utils.train import collate_fn
+from patch.tuning.sweep_lr import select_best_lr
 from patch.tuning.sweep_neg import select_best_neg
 
 RESULTS_DIR = "patch/tuning/results/epochs"
-HF_REPO = "mpg-ranch/dye-patch"
 MAX_EPOCHS = 30
 N_FOLDS = 3
 N_FOLDS_TEMPORAL = 3
@@ -42,21 +42,6 @@ def load_best_overlay(config: str) -> SyntheticDyeOverlay | None:
         return None
     return SyntheticDyeOverlay()
 
-
-def get_train_data_for_config(config: str):
-    """Load full training split for a config."""
-    if config == "real_only":
-        return load_dataset(HF_REPO, "sprayed", split="train")
-    elif config == "hybrid":
-        from datasets import concatenate_datasets
-        sprayed = load_dataset(HF_REPO, "sprayed", split="train")
-        annex = load_dataset(HF_REPO, "unsprayed_annex", split="train")
-        return concatenate_datasets([sprayed, annex])
-    elif config == "synth_local":
-        return load_dataset(HF_REPO, "unsprayed_annex", split="train")
-    elif config == "synth_offsite":
-        return load_dataset(HF_REPO, "offsite", split="train")
-    return load_dataset(HF_REPO, "sprayed", split="train")
 
 
 def _kfold_split(ds, fold_idx: int):

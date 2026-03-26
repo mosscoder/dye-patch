@@ -10,9 +10,7 @@ Usage (on cluster login node):
 
 import os
 
-from patch.utils.config import MODEL_NAME
-
-HF_REPO = "mpg-ranch/dye-patch"
+from patch.utils.config import HF_REPO, MODEL_NAME
 HF_CONFIGS_SPLITS = [
     ("sprayed", "train"),
     ("sprayed", "test"),

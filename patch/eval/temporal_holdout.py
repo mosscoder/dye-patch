@@ -15,17 +15,16 @@ import torch
 from datasets import load_dataset
 from torch.utils.data import DataLoader
 
-from patch.utils.config import CONFIGS, EVAL_SEED, MONTHS
+from patch.utils.config import CONFIGS, EVAL_SEED, HF_REPO, MONTHS
 from patch.utils.dataset import DyePatchDataset
 from patch.utils.models import create_model, save_head
-from patch.utils.train import PatchTrainer, save_results, set_seed
+from patch.utils.train import PatchTrainer, compute_spray_metrics, save_results, set_seed
 from patch.tuning.sweep_epochs import load_best_overlay, select_best_epoch
-from patch.tuning.sweep_lr import collate_fn, select_best_lr
+from patch.utils.train import collate_fn
+from patch.tuning.sweep_lr import select_best_lr
 from patch.tuning.sweep_neg import select_best_neg
-from patch.eval.data_source import compute_spray_metrics
 
 RESULTS_DIR = "patch/eval/results/temporal"
-HF_REPO = "mpg-ranch/dye-patch"
 
 
 def get_train_data_for_config_and_month(config: str, train_month: str):

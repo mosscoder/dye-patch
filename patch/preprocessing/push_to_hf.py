@@ -18,13 +18,12 @@ import os
 import pandas as pd
 from datasets import Dataset, DatasetDict, Features, Image, Value
 
-from patch.utils.config import TUNING_TEST_FRAC
+from patch.utils.config import HF_REPO, TUNING_TEST_FRAC
 from patch.utils.dataset import stratified_split
 
 
 MPG_TILE_DIR = "data/images/mpg_ranch/tiles"
 OFFSITE_TILE_DIR = "data/images/european_grassland/tiles"
-HF_REPO = "mpg-ranch/dye-patch"
 
 FEATURES = Features({
     "image": Image(),

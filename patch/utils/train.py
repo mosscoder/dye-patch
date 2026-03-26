@@ -16,6 +16,14 @@ from patch.utils.config import EVAL_CROP_OFFSET, NEG_MULTIPLIER, NO_DYE_NEG_SAMP
 from patch.utils.dataset import generate_patch_labels
 
 
+def collate_fn(batch):
+    """Default collate for DyePatchDataset: stack images/masks, list metadata."""
+    images = torch.stack([b[0] for b in batch])
+    masks = torch.stack([b[1] for b in batch])
+    metadata = [b[2] for b in batch]
+    return images, masks, metadata
+
+
 def set_seed(seed: int):
     """Set all random seeds for reproducibility."""
     random.seed(seed)
@@ -71,6 +79,8 @@ def compute_spray_metrics(preds, metadata_list):
     return {
         "tp": tp, "fp": fp, "fn": fn, "tn": tn,
         "precision": precision, "recall": recall, "f1": f1,
+        "n_sprayed_tiles": tp + fn,
+        "n_peripheral_patches": fp + tn,
     }
 
 

@@ -36,6 +36,9 @@ LABEL_BLUE = 2
 COLOR_TO_LABEL = {"red": LABEL_RED, "blue": LABEL_BLUE}
 DYE_COLORS = ["red", "blue"]
 
+# HuggingFace dataset
+HF_REPO = "mpg-ranch/dye-patch"
+
 # =============================================================================
 # Synthetic dye blob generation
 # =============================================================================

@@ -12,17 +12,14 @@ import json
 import os
 
 import torch
-from datasets import load_dataset
 from torch.utils.data import DataLoader
 
 from patch.utils.config import LR_SEEDS, NEG_MULTIPLIERS
-from patch.utils.dataset import DyePatchDataset, tuning_split
+from patch.utils.dataset import DyePatchDataset, get_train_data_for_config, tuning_split
 from patch.utils.models import create_model, save_head
-from patch.utils.train import PatchTrainer, save_results, set_seed
-from patch.tuning.sweep_lr import collate_fn
+from patch.utils.train import PatchTrainer, collate_fn, save_results, set_seed
 
 RESULTS_DIR = "patch/tuning/results/neg"
-HF_REPO = "mpg-ranch/dye-patch"
 N_EPOCHS = 30
 FIXED_LR = 0.0005
 
@@ -38,7 +35,7 @@ def run_sweep(idx: int):
     print(f"NegMult={neg_mult} LR={lr} Seed={seed}")
     set_seed(seed)
 
-    ds = load_dataset(HF_REPO, "sprayed", split="train")
+    ds = get_train_data_for_config("real_only")
     tune_train, tune_val = tuning_split(ds, seed=seed)
 
     train_ds = DyePatchDataset(tune_train, overlay=None, training=True)
