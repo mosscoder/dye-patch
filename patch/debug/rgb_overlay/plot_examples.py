@@ -1,8 +1,8 @@
 """
-Visualize HSV KNN-matched overlay with Gaussian-feathered edges.
+Visualize analog-matched HSV overlay with Gaussian-feathered edges.
 
-For each sample: original tile (left), overlaid tile (center), label mask (right).
-Each blob gets one uniform HSV delta matched by nearest neighbor on vegetation HSV.
+For each blob: sample 10 random deltas from the lookup table, pick one,
+apply uniformly with bilinear-interpolated per-patch variation and feathering.
 
 Usage:
   python -m patch.debug.rgb_overlay.build_table   # first time only
@@ -11,14 +11,13 @@ Usage:
 """
 
 import argparse
-import colorsys
 import math
 import random
 
 import matplotlib.pyplot as plt
 import numpy as np
 from datasets import load_dataset
-from scipy.ndimage import gaussian_filter
+from scipy.ndimage import gaussian_filter, zoom
 from scipy.spatial import cKDTree
 
 from patch.utils.config import (
@@ -31,14 +30,14 @@ from patch.utils.config import (
 )
 from patch.utils.augmentations import patch_aligned_crop
 
-SEED = 0
+SEED = 42
 TABLE_PATH = "patch/debug/rgb_overlay/hsv_knn_deltas.npz"
 OUTPUT_DIR = "patch/debug/rgb_overlay"
 BLOB_SIGMA = 3.0
+N_ANALOGS = 10
 
 
 def _make_wobbly_circle(center_y, center_x, base_radius, H, W):
-    """Same blob shape as synthetic.py."""
     mask = np.zeros((H, W), dtype=bool)
     n_harmonics = random.randint(2, 3)
     harmonics = []
@@ -71,49 +70,56 @@ def _make_wobbly_circle(center_y, center_x, base_radius, H, W):
     return mask
 
 
-def _hue_dist(h1, h2):
-    """Circular hue distance."""
-    d = abs(h1 - h2)
-    return min(d, 1.0 - d)
+def _image_shadow_threshold(image_float):
+    """5th percentile of V channel across entire image (float32 0-1)."""
+    # V = max(R, G, B) in HSV
+    v_values = image_float.max(axis=-1).ravel()
+    return np.percentile(v_values, 10)
 
 
-def _patch_mean_hsv(image_float, pr, pc):
-    """Mean HSV of a single ViT patch with circular hue mean."""
+def _rgb_to_hsv_vectorized(rgb):
+    """Vectorized RGB (float 0-1) to HSV. Input shape (N, 3), output (N, 3)."""
+    r, g, b = rgb[:, 0], rgb[:, 1], rgb[:, 2]
+    maxc = np.maximum(np.maximum(r, g), b)
+    minc = np.minimum(np.minimum(r, g), b)
+    v = maxc
+    diff = maxc - minc
+    s = np.where(maxc > 0, diff / maxc, 0.0)
+
+    h = np.zeros_like(maxc)
+    mask = diff > 0
+    rc = np.where(mask, (maxc - r) / np.where(mask, diff, 1), 0)
+    gc = np.where(mask, (maxc - g) / np.where(mask, diff, 1), 0)
+    bc = np.where(mask, (maxc - b) / np.where(mask, diff, 1), 0)
+
+    h = np.where(mask & (r == maxc), bc - gc, h)
+    h = np.where(mask & (g == maxc), 2.0 + rc - bc, h)
+    h = np.where(mask & (b == maxc), 4.0 + gc - rc, h)
+    h = (h / 6.0) % 1.0
+
+    return np.column_stack([h, s, v])
+
+
+def _patch_mean_hsv(image_float, pr, pc, shadow_v=0.0):
+    """Mean HSV of a ViT patch, excluding shadow pixels (V < shadow_v)."""
     y0 = pr * VIT_PATCH_SIZE
     x0 = pc * VIT_PATCH_SIZE
     block = image_float[y0:y0 + VIT_PATCH_SIZE, x0:x0 + VIT_PATCH_SIZE]
     pixels = block.reshape(-1, 3)
-    hsv = np.array([colorsys.rgb_to_hsv(r, g, b) for r, g, b in pixels])
+    hsv = _rgb_to_hsv_vectorized(pixels)
 
-    hue_angles = hsv[:, 0] * 2 * np.pi
+    lit = hsv[:, 2] >= shadow_v
+    if not lit.any():
+        lit = np.ones(len(hsv), dtype=bool)
+
+    hsv_lit = hsv[lit]
+    hue_angles = hsv_lit[:, 0] * 2 * np.pi
     mean_hue = (np.arctan2(np.mean(np.sin(hue_angles)), np.mean(np.cos(hue_angles))) / (2 * np.pi)) % 1.0
-    return np.array([mean_hue, hsv[:, 1].mean(), hsv[:, 2].mean()])
-
-
-def _apply_hsv_delta_patch(image_float, soft_mask, pr, pc, dh, ds, dv):
-    """Apply HSV delta to one ViT patch's pixels with soft feathering."""
-    y0 = pr * VIT_PATCH_SIZE
-    x0 = pc * VIT_PATCH_SIZE
-    y1 = y0 + VIT_PATCH_SIZE
-    x1 = x0 + VIT_PATCH_SIZE
-
-    block = image_float[y0:y1, x0:x1]
-    strength = soft_mask[y0:y1, x0:x1]
-    pixels = block.reshape(-1, 3)
-    str_flat = strength.reshape(-1)
-
-    hsv = np.array([colorsys.rgb_to_hsv(r, g, b) for r, g, b in pixels])
-    hsv[:, 0] = (hsv[:, 0] + dh * str_flat) % 1.0
-    hsv[:, 1] = np.clip(hsv[:, 1] + ds * str_flat, 0, 1)
-    hsv[:, 2] = np.clip(hsv[:, 2] + dv * str_flat, 0, 1)
-
-    rgb = np.array([colorsys.hsv_to_rgb(h, s, v) for h, s, v in hsv])
-    image_float[y0:y1, x0:x1] = rgb.reshape(VIT_PATCH_SIZE, VIT_PATCH_SIZE, 3).astype(np.float32)
+    return np.array([mean_hue, hsv_lit[:, 1].mean(), hsv_lit[:, 2].mean()])
 
 
 def _apply_overlay(image, color_name, kd_tree, delta_table):
-    """Apply one synthetic dye blob with per-patch KNN-matched HSV deltas,
-    bilinearly interpolated to pixel resolution for smooth transitions."""
+    """Apply one blob with per-patch NN-matched delta, bilinearly interpolated."""
     H, W = image.shape[:2]
     label_mask = np.zeros((GRID_DIM, GRID_DIM), dtype=np.int8)
     color_label = 1 if color_name == "red" else 2
@@ -129,47 +135,57 @@ def _apply_overlay(image, color_name, kd_tree, delta_table):
     if not blob_mask.any():
         return overlaid, label_mask
 
-    # Soft feathered edges
     soft_mask = gaussian_filter(blob_mask.astype(np.float32), sigma=BLOB_SIGMA)
 
-    # Find which ViT patches the blob covers
+    # Shadow threshold for this image
+    shadow_v = _image_shadow_threshold(overlaid)
+
+    # Find covered patches
     fm = blob_mask[:GRID_DIM * VIT_PATCH_SIZE, :GRID_DIM * VIT_PATCH_SIZE]
     fm = fm.reshape(GRID_DIM, VIT_PATCH_SIZE, GRID_DIM, VIT_PATCH_SIZE)
     patch_hits = fm.any(axis=(1, 3))
 
-    # Build sparse delta grid at patch resolution
+    # Per-patch: match veg HSV to table, get delta (shadow pixels excluded from mean)
     delta_grid = np.zeros((GRID_DIM, GRID_DIM, 3), dtype=np.float32)
     for pr in range(GRID_DIM):
         for pc in range(GRID_DIM):
             if not patch_hits[pr, pc]:
                 continue
-            patch_hsv = _patch_mean_hsv(overlaid, pr, pc)
+            patch_hsv = _patch_mean_hsv(overlaid, pr, pc, shadow_v)
             _, idx = kd_tree.query(patch_hsv)
             delta_grid[pr, pc] = delta_table[idx]
 
     # Bilinear interpolate to pixel resolution
-    from scipy.ndimage import zoom
-    delta_field = zoom(delta_grid, (VIT_PATCH_SIZE, VIT_PATCH_SIZE, 1), order=1)  # (384, 384, 3)
+    delta_field = zoom(delta_grid, (VIT_PATCH_SIZE, VIT_PATCH_SIZE, 1), order=1)
 
-    # Apply interpolated delta field to blob pixels
+    # Apply with feathering
     ys, xs = np.where(blob_mask)
-    # Clamp to delta_field bounds
     ys_c = np.clip(ys, 0, delta_field.shape[0] - 1)
     xs_c = np.clip(xs, 0, delta_field.shape[1] - 1)
 
     pixels = overlaid[ys, xs]
-    hsv = np.array([colorsys.rgb_to_hsv(r, g, b) for r, g, b in pixels])
+    hsv = _rgb_to_hsv_vectorized(pixels)
 
     strength = soft_mask[ys, xs]
-    dh = delta_field[ys_c, xs_c, 0] * strength
-    ds = delta_field[ys_c, xs_c, 1] * strength
-    dv = delta_field[ys_c, xs_c, 2] * strength
+    hsv[:, 0] = (hsv[:, 0] + delta_field[ys_c, xs_c, 0] * strength) % 1.0
+    hsv[:, 1] = np.clip(hsv[:, 1] + delta_field[ys_c, xs_c, 1] * strength, 0, 1)
+    hsv[:, 2] = np.clip(hsv[:, 2] + delta_field[ys_c, xs_c, 2] * strength, 0, 1)
 
-    hsv[:, 0] = (hsv[:, 0] + dh) % 1.0
-    hsv[:, 1] = np.clip(hsv[:, 1] + ds, 0, 1)
-    hsv[:, 2] = np.clip(hsv[:, 2] + dv, 0, 1)
+    # Vectorized HSV → RGB
+    h, s, v = hsv[:, 0], hsv[:, 1], hsv[:, 2]
+    i = (h * 6.0).astype(int) % 6
+    f = h * 6.0 - np.floor(h * 6.0)
+    p = v * (1.0 - s)
+    q = v * (1.0 - s * f)
+    t = v * (1.0 - s * (1.0 - f))
 
-    rgb = np.array([colorsys.hsv_to_rgb(h, s, v) for h, s, v in hsv])
+    rgb = np.zeros_like(hsv)
+    for idx_val, (r_, g_, b_) in enumerate([(v, t, p), (q, v, p), (p, v, t), (p, q, v), (t, p, v), (v, p, q)]):
+        mask = i == idx_val
+        rgb[mask, 0] = r_[mask]
+        rgb[mask, 1] = g_[mask]
+        rgb[mask, 2] = b_[mask]
+
     overlaid[ys, xs] = rgb.astype(np.float32)
 
     label_mask[patch_hits] = color_label
@@ -180,7 +196,7 @@ def main(hf_config: str, seed: int):
     random.seed(seed)
     np.random.seed(seed)
 
-    # Load lookup table + build KD-trees
+    # Load lookup table
     data = np.load(TABLE_PATH)
     trees = {}
     delta_tables = {}
@@ -203,28 +219,23 @@ def main(hf_config: str, seed: int):
         tile = ds[tile_idx]
         img_pil = tile["image"].convert("RGB")
 
-        # Resize + crop
         img_512 = img_pil.resize((PRECROP_SIZE, PRECROP_SIZE))
         img_np = np.array(img_512, dtype=np.uint8)
         crop_np, _ = patch_aligned_crop(img_np)
         crop_float = crop_np.astype(np.float32) / 255.0
 
-        # Apply overlay
         overlaid, label_mask = _apply_overlay(
             crop_float, color_name, trees[color_name], delta_tables[color_name]
         )
 
-        # Left: original
         axes[row_idx, 0].imshow(crop_float)
         axes[row_idx, 0].set_title(f"Original ({tile.get('month', '?')})", fontsize=9)
         axes[row_idx, 0].axis("off")
 
-        # Center: overlaid
         axes[row_idx, 1].imshow(overlaid)
-        axes[row_idx, 1].set_title(f"HSV KNN overlay ({color_name})", fontsize=9)
+        axes[row_idx, 1].set_title(f"Analog overlay ({color_name})", fontsize=9)
         axes[row_idx, 1].axis("off")
 
-        # Right: mask
         axes[row_idx, 2].imshow(label_mask,
                                 cmap="Reds" if color_name == "red" else "Blues",
                                 vmin=0, vmax=2, interpolation="nearest")
@@ -232,7 +243,7 @@ def main(hf_config: str, seed: int):
         axes[row_idx, 2].set_title(f"Mask ({dye_count} patches)", fontsize=9)
         axes[row_idx, 2].axis("off")
 
-    fig.suptitle(f"HSV KNN Overlay — {hf_config}", fontsize=11, fontweight="bold")
+    fig.suptitle(f"Analog HSV Overlay — {hf_config}", fontsize=11, fontweight="bold")
     plt.tight_layout()
 
     out_path = f"{OUTPUT_DIR}/examples_{hf_config}_seed{seed}.png"
