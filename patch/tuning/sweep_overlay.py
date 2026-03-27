@@ -99,26 +99,32 @@ def _bootstrap_stats(deltas: np.ndarray, n_boot: int = N_BOOTSTRAPS) -> dict:
     quantiles. The blob drawer samples uniformly from [q25, q75].
     """
     n = len(deltas)
+    boot_q10 = np.zeros((n_boot, 3))
     boot_q25 = np.zeros((n_boot, 3))
     boot_median = np.zeros((n_boot, 3))
     boot_q75 = np.zeros((n_boot, 3))
+    boot_q90 = np.zeros((n_boot, 3))
 
     for b in range(n_boot):
         idx = np.random.randint(0, n, size=n)
         sample = deltas[idx]
+        boot_q10[b] = np.percentile(sample, 10, axis=0)
         boot_q25[b] = np.percentile(sample, 25, axis=0)
         boot_median[b] = np.median(sample, axis=0)
         boot_q75[b] = np.percentile(sample, 75, axis=0)
+        boot_q90[b] = np.percentile(sample, 90, axis=0)
 
     # Use median of bootstrapped quantiles as the stable estimate
+    q10 = np.median(boot_q10, axis=0)
     q25 = np.median(boot_q25, axis=0)
     median = np.median(boot_median, axis=0)
     q75 = np.median(boot_q75, axis=0)
+    q90 = np.median(boot_q90, axis=0)
 
     return {
-        "dh": {"q25": float(q25[0]), "median": float(median[0]), "q75": float(q75[0])},
-        "ds": {"q25": float(q25[1]), "median": float(median[1]), "q75": float(q75[1])},
-        "dv": {"q25": float(q25[2]), "median": float(median[2]), "q75": float(q75[2])},
+        "dh": {"q10": float(q10[0]), "q25": float(q25[0]), "median": float(median[0]), "q75": float(q75[0]), "q90": float(q90[0])},
+        "ds": {"q10": float(q10[1]), "q25": float(q25[1]), "median": float(median[1]), "q75": float(q75[1]), "q90": float(q90[1])},
+        "dv": {"q10": float(q10[2]), "q25": float(q25[2]), "median": float(median[2]), "q75": float(q75[2]), "q90": float(q90[2])},
         "n_tiles": n,
         "bootstrap_se": {
             "dh": float(np.std(boot_median[:, 0])),

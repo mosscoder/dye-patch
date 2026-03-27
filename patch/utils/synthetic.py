@@ -27,10 +27,10 @@ from patch.utils.config import (
 )
 
 # Default deltas used if no empirical hsv_deltas.json exists
-# Per-blob, sample each channel uniformly from [q25, q75]
+# Per-blob, sample each channel uniformly from [q10, q90]
 DEFAULT_DELTAS = {
-    "red":  {"dh": {"q25": -0.03, "q75": 0.03}, "ds": {"q25": 0.0, "q75": 0.20}, "dv": {"q25": -0.15, "q75": 0.05}},
-    "blue": {"dh": {"q25": -0.03, "q75": 0.03}, "ds": {"q25": 0.0, "q75": 0.20}, "dv": {"q25": -0.15, "q75": 0.05}},
+    "red":  {"dh": {"q10": -0.05, "q90": 0.05}, "ds": {"q10": -0.05, "q90": 0.25}, "dv": {"q10": -0.20, "q90": 0.10}},
+    "blue": {"dh": {"q10": -0.05, "q90": 0.05}, "ds": {"q10": -0.05, "q90": 0.25}, "dv": {"q10": -0.20, "q90": 0.10}},
 }
 
 HSV_DELTAS_PATH = "patch/tuning/results/overlay/hsv_deltas.json"
@@ -124,11 +124,11 @@ class SyntheticDyeOverlay:
         self.max_radius_px = BLOB_SIZE_RANGE_PX[1] / 2
 
     def _sample_delta(self, color_name: str) -> tuple[float, float, float]:
-        """Sample (dh, ds, dv) for one blob from the empirical IQR."""
+        """Sample (dh, ds, dv) for one blob from the empirical q10-q90 range."""
         d = self.deltas.get(color_name, DEFAULT_DELTAS.get(color_name))
-        dh = _sample_range(d["dh"]["q25"], d["dh"]["q75"])
-        ds = _sample_range(d["ds"]["q25"], d["ds"]["q75"])
-        dv = _sample_range(d["dv"]["q25"], d["dv"]["q75"])
+        dh = _sample_range(d["dh"]["q10"], d["dh"]["q90"])
+        ds = _sample_range(d["ds"]["q10"], d["ds"]["q90"])
+        dv = _sample_range(d["dv"]["q10"], d["dv"]["q90"])
         return dh, ds, dv
 
     def _apply_hsv_delta(self, image: np.ndarray, blob_mask: np.ndarray,
