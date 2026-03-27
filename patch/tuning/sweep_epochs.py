@@ -64,6 +64,14 @@ def _kfold_split(ds, fold_idx: int):
     return ds.select(_point_indices(ds, train_points)), ds.select(_point_indices(ds, val_points))
 
 
+def _get_sprayed_val_fold(fold_idx: int):
+    """Get the val fold from sprayed data — same split for every config."""
+    from datasets import load_dataset
+    sprayed = load_dataset(HF_REPO, "sprayed", split="train")
+    _, fold_val = _kfold_split(sprayed, fold_idx)
+    return fold_val
+
+
 def _train_fold(ds, fold_idx: int, config: str, out_dir: str, extra_meta: dict = None):
     """Train one fold, save results."""
     set_seed(fold_idx)
@@ -72,14 +80,14 @@ def _train_fold(ds, fold_idx: int, config: str, out_dir: str, extra_meta: dict =
     neg_mult = select_best_neg()
     overlay = load_best_overlay(config)
 
-    fold_train, fold_val = _kfold_split(ds, fold_idx)
+    # Val always from the same sprayed fold, regardless of config.
+    # Train excludes val points to prevent leakage.
+    fold_val = _get_sprayed_val_fold(fold_idx)
+    val_points = set(str(r.get("point_name", "")) for r in fold_val)
 
-    # Val only on sprayed tiles — annex/offsite have no real spray labels,
-    # so any prediction on them would be counted as FP.
-    if config != "real_only":
-        sprayed_idx = [i for i, r in enumerate(fold_val) if r.get("spray_size_m", 0.0) > 0]
-        if sprayed_idx:
-            fold_val = fold_val.select(sprayed_idx)
+    # Remove val points from training data (only affects sprayed tiles in the config)
+    train_idx = [i for i, r in enumerate(ds) if str(r.get("point_name", "")) not in val_points]
+    fold_train = ds.select(train_idx)
 
     train_ds = DyePatchDataset(fold_train, overlay=overlay, training=True)
     val_ds = DyePatchDataset(fold_val, overlay=None, training=False)
