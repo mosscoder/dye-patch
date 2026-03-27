@@ -31,7 +31,7 @@ from patch.tuning.sweep_lr import select_best_lr
 from patch.tuning.sweep_neg import select_best_neg
 
 RESULTS_DIR = "patch/tuning/results/epochs"
-MAX_EPOCHS = 30
+MAX_EPOCHS = 100
 N_FOLDS = 3
 N_FOLDS_TEMPORAL = 3
 
