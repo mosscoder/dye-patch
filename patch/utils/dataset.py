@@ -115,12 +115,18 @@ class DyePatchDataset(Dataset):
         Synthetic overlay generator.  None disables overlay (eval mode).
     training : bool
         If True, apply augmentations and random crop.  If False, centre crop.
+    suppress_real_labels : bool
+        If True, zero out real spray labels so only synthetic blobs contribute
+        positive signal. Used by synth_local config to treat sprayed tiles
+        as vegetation-only backgrounds.
     """
 
-    def __init__(self, hf_dataset, overlay: SyntheticDyeOverlay | None = None, training: bool = True):
+    def __init__(self, hf_dataset, overlay: SyntheticDyeOverlay | None = None,
+                 training: bool = True, suppress_real_labels: bool = False):
         self.data = hf_dataset
         self.overlay = overlay
         self.training = training
+        self.suppress_real_labels = suppress_real_labels
 
         if training:
             self.pre_transform = create_pre_overlay_transform()
@@ -167,11 +173,16 @@ class DyePatchDataset(Dataset):
         image = PILImage.fromarray(crop_np)
 
         # 3. Compute label mask from spray metadata + crop offset
-        mask = generate_patch_labels(
-            crop_offset=crop_offset,
-            spray_size_m=row.get("spray_size_m", 0.0),
-            spray_color=row.get("color", "none"),
-        )
+        if self.suppress_real_labels:
+            mask = generate_patch_labels(
+                crop_offset=crop_offset, spray_size_m=0.0, spray_color="none",
+            )
+        else:
+            mask = generate_patch_labels(
+                crop_offset=crop_offset,
+                spray_size_m=row.get("spray_size_m", 0.0),
+                spray_color=row.get("color", "none"),
+            )
 
         # 4. Synthetic dye overlay
         # Always apply if overlay is set — for synth_local/synth_offsite/hybrid,
@@ -207,7 +218,9 @@ def get_train_data_for_config(config: str):
         annex = load_dataset(HF_REPO, "unsprayed_annex", split="train")
         return concatenate_datasets([sprayed, annex])
     elif config == "synth_local":
-        return load_dataset(HF_REPO, "unsprayed_annex", split="train")
+        sprayed = load_dataset(HF_REPO, "sprayed", split="train")
+        annex = load_dataset(HF_REPO, "unsprayed_annex", split="train")
+        return concatenate_datasets([sprayed, annex])
     elif config == "synth_offsite":
         return load_dataset(HF_REPO, "offsite", split="train")
     return load_dataset(HF_REPO, "sprayed", split="train")

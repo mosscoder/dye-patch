@@ -16,10 +16,9 @@ from torch.utils.data import DataLoader
 from patch.utils.config import CONFIGS, EVAL_SEED, HF_REPO
 from patch.utils.dataset import DyePatchDataset
 from patch.utils.models import create_model, save_head
-from patch.utils.synthetic import SyntheticDyeOverlay
 from patch.utils.train import PatchTrainer, compute_spray_metrics, save_results, set_seed
 from patch.utils.dataset import get_train_data_for_config
-from patch.tuning.sweep_epochs import load_best_overlay, select_best_epoch
+from patch.tuning.sweep_epochs import build_overlay, select_best_epoch
 from patch.utils.train import collate_fn
 from patch.tuning.sweep_lr import select_best_lr
 from patch.tuning.sweep_neg import select_best_neg
@@ -38,12 +37,16 @@ def run_eval(idx: int):
 
     lr = select_best_lr(config)
     neg_mult = select_best_neg()
-    overlay = load_best_overlay(config)
     n_epochs = select_best_epoch(config)
 
     # Train on full training split
     train_hf = get_train_data_for_config(config)
-    train_ds = DyePatchDataset(train_hf, overlay=overlay, training=True)
+
+    # Build overlay from all sprayed train tiles
+    sprayed_train = load_dataset(HF_REPO, "sprayed", split="train")
+    overlay = build_overlay(config, sprayed_train)
+    suppress = config == "synth_local"
+    train_ds = DyePatchDataset(train_hf, overlay=overlay, training=True, suppress_real_labels=suppress)
     train_loader = DataLoader(train_ds, batch_size=32, shuffle=True, collate_fn=collate_fn, num_workers=4)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"

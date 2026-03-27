@@ -15,19 +15,12 @@ from torch.utils.data import DataLoader
 from patch.utils.config import CONFIGS, LR_GRID, LR_SEEDS
 from patch.utils.dataset import DyePatchDataset, get_train_data_for_config, tuning_split
 from patch.utils.models import create_model, save_head
-from patch.utils.synthetic import SyntheticDyeOverlay
 from patch.utils.train import PatchTrainer, collate_fn, save_results, set_seed
 from patch.tuning.sweep_neg import select_best_neg
 
 RESULTS_DIR = "patch/tuning/results/lr"
 N_EPOCHS = 50
 
-
-def get_overlay_for_config(config: str) -> SyntheticDyeOverlay | None:
-    """Return overlay if config uses synthetic data, else None."""
-    if config in ("hybrid", "synth_local", "synth_offsite"):
-        return SyntheticDyeOverlay()
-    return None
 
 
 def get_split_for_config(config: str, seed: int = 0):

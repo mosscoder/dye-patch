@@ -38,8 +38,10 @@ random.seed(SEED)
 
 
 def make_overlay() -> SyntheticDyeOverlay:
-    """Create overlay using empirical HSV deltas (or defaults)."""
-    return SyntheticDyeOverlay()
+    """Create overlay from sprayed train tiles."""
+    from datasets import load_dataset
+    sprayed = load_dataset(HF_REPO, "sprayed", split="train")
+    return SyntheticDyeOverlay(sprayed)
 
 
 def apply_overlay(tile_384: np.ndarray, color_name: str, spray_mask: np.ndarray | None = None):

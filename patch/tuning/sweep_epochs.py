@@ -36,11 +36,11 @@ N_FOLDS = 3
 N_FOLDS_TEMPORAL = 3
 
 
-def load_best_overlay(config: str) -> SyntheticDyeOverlay | None:
-    """Load empirical HSV deltas, or None for real_only."""
+def build_overlay(config: str, sprayed_train) -> SyntheticDyeOverlay | None:
+    """Build overlay from sprayed train data, or None for real_only."""
     if config == "real_only":
         return None
-    return SyntheticDyeOverlay()
+    return SyntheticDyeOverlay(sprayed_train)
 
 
 
@@ -78,7 +78,6 @@ def _train_fold(ds, fold_idx: int, config: str, out_dir: str, extra_meta: dict =
 
     lr = select_best_lr(config)
     neg_mult = select_best_neg()
-    overlay = load_best_overlay(config)
 
     # Val always from the same sprayed fold, regardless of config.
     # Train excludes val points to prevent leakage.
@@ -89,7 +88,15 @@ def _train_fold(ds, fold_idx: int, config: str, out_dir: str, extra_meta: dict =
     train_idx = [i for i, r in enumerate(ds) if str(r.get("point_name", "")) not in val_points]
     fold_train = ds.select(train_idx)
 
-    train_ds = DyePatchDataset(fold_train, overlay=overlay, training=True)
+    # Build overlay from sprayed tiles in the train fold (excludes val points)
+    from datasets import load_dataset
+    sprayed_all = load_dataset(HF_REPO, "sprayed", split="train")
+    sprayed_train_idx = [i for i, r in enumerate(sprayed_all) if str(r.get("point_name", "")) not in val_points]
+    sprayed_train = sprayed_all.select(sprayed_train_idx)
+    overlay = build_overlay(config, sprayed_train)
+
+    suppress = config == "synth_local"
+    train_ds = DyePatchDataset(fold_train, overlay=overlay, training=True, suppress_real_labels=suppress)
     val_ds = DyePatchDataset(fold_val, overlay=None, training=False)
 
     train_loader = DataLoader(train_ds, batch_size=32, shuffle=True, collate_fn=collate_fn, num_workers=4)

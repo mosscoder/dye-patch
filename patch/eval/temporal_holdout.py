@@ -19,7 +19,7 @@ from patch.utils.config import CONFIGS, EVAL_SEED, HF_REPO, MONTHS
 from patch.utils.dataset import DyePatchDataset
 from patch.utils.models import create_model, save_head
 from patch.utils.train import PatchTrainer, compute_spray_metrics, save_results, set_seed
-from patch.tuning.sweep_epochs import load_best_overlay, select_best_epoch
+from patch.tuning.sweep_epochs import build_overlay, select_best_epoch
 from patch.utils.train import collate_fn
 from patch.tuning.sweep_lr import select_best_lr
 from patch.tuning.sweep_neg import select_best_neg
@@ -68,16 +68,21 @@ def run_holdout(idx: int):
 
     lr = select_best_lr(config)
     neg_mult = select_best_neg()
-    overlay = load_best_overlay(config)
     n_epochs = select_best_epoch(config, train_month=train_month)
 
     # Train on single month's train split
     train_hf = get_train_data_for_config_and_month(config, train_month)
 
+    # Build overlay from sprayed train tiles for this month — same source regardless of config
+    sprayed_train = load_dataset(HF_REPO, "sprayed", split="train")
+    sprayed_train = sprayed_train.filter(lambda r: r["month"] == train_month)
+    overlay = build_overlay(config, sprayed_train)
+
     # Eval on the other two months' test splits
     eval_hf = get_eval_data_for_holdout(config, train_month)
 
-    train_ds = DyePatchDataset(train_hf, overlay=overlay, training=True)
+    suppress = config == "synth_local"
+    train_ds = DyePatchDataset(train_hf, overlay=overlay, training=True, suppress_real_labels=suppress)
     eval_ds = DyePatchDataset(eval_hf, overlay=None, training=False)
 
     train_loader = DataLoader(train_ds, batch_size=32, shuffle=True, collate_fn=collate_fn, num_workers=4)
