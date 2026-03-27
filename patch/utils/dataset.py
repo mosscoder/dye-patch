@@ -173,12 +173,13 @@ class DyePatchDataset(Dataset):
             spray_color=row.get("color", "none"),
         )
 
-        # 4. Synthetic dye overlay (50% chance)
-        if self.overlay is not None and random.random() < 0.5:
+        # 4. Synthetic dye overlay
+        # Always apply if overlay is set — for synth_local/synth_offsite/hybrid,
+        # the overlay is the source of positive labels.
+        if self.overlay is not None:
             image_np = np.array(image, dtype=np.float32) / 255.0
 
             # Determine overlay colour: match real dye for spray tiles
-            tile_type = row.get("tile_type", "")
             real_color = row.get("color", "none")
             overlay_color = real_color if real_color in ("red", "blue") else None
 

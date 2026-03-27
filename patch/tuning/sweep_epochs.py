@@ -74,6 +74,13 @@ def _train_fold(ds, fold_idx: int, config: str, out_dir: str, extra_meta: dict =
 
     fold_train, fold_val = _kfold_split(ds, fold_idx)
 
+    # Val only on sprayed tiles — annex/offsite have no real spray labels,
+    # so any prediction on them would be counted as FP.
+    if config != "real_only":
+        sprayed_idx = [i for i, r in enumerate(fold_val) if r.get("spray_size_m", 0.0) > 0]
+        if sprayed_idx:
+            fold_val = fold_val.select(sprayed_idx)
+
     train_ds = DyePatchDataset(fold_train, overlay=overlay, training=True)
     val_ds = DyePatchDataset(fold_val, overlay=None, training=False)
 

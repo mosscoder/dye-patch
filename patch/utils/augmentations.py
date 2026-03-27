@@ -19,7 +19,6 @@ from patch.utils.config import (
     AUG_BLUR_SIGMA,
     AUG_CONTRAST,
     AUG_PROB,
-    AUG_ROTATION_DEGREES,
     MODEL_INPUT_SIZE,
     NORM_MEAN,
     NORM_STD,
@@ -37,9 +36,6 @@ def create_pre_overlay_transform():
     return T.Compose([
         T.Resize(size=(PRECROP_SIZE, PRECROP_SIZE), interpolation=Image.LANCZOS),
         T.RandomHorizontalFlip(p=AUG_PROB),
-        T.RandomApply(
-            [T.RandomRotation(degrees=AUG_ROTATION_DEGREES)], p=AUG_PROB
-        ),
         T.RandomApply(
             [T.GaussianBlur(kernel_size=AUG_BLUR_KERNEL, sigma=AUG_BLUR_SIGMA)],
             p=AUG_PROB,

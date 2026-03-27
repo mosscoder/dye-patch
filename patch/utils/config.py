@@ -52,7 +52,6 @@ BLOB_SIZE_RANGE_PX = (
 # Augmentations (match wolverines, exclude grayscale)
 # =============================================================================
 AUG_PROB = 0.5
-AUG_ROTATION_DEGREES = 15
 AUG_BLUR_KERNEL = 5
 AUG_BLUR_SIGMA = (0.1, 2.0)
 AUG_BRIGHTNESS = 0.2
