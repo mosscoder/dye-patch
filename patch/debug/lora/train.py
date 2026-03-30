@@ -170,11 +170,18 @@ def run(seed: int, use_lora: bool):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model = create_lora_model(use_lora=use_lora, device=device)
 
-    trainable_params = model.get_trainable_parameters()
-    n_params = sum(p.numel() for p in trainable_params)
+    n_params = sum(p.numel() for p in model.get_trainable_parameters())
     print(f"  Trainable params: {n_params:,}")
 
-    optimizer = torch.optim.AdamW(trainable_params, lr=LR, weight_decay=0.01)
+    if use_lora:
+        lora_params = [p for n, p in model.backbone.named_parameters() if p.requires_grad]
+        optimizer = torch.optim.AdamW([
+            {"params": model.classifier.parameters(), "lr": LR},
+            {"params": lora_params, "lr": 1e-5},
+        ], weight_decay=0.01)
+        print(f"  Differential LR: classifier={LR}, LoRA=1e-5")
+    else:
+        optimizer = torch.optim.AdamW(model.get_trainable_parameters(), lr=LR, weight_decay=0.01)
 
     train_history = []
     val_history = []

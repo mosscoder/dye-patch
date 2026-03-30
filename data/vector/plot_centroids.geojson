@@ -1,0 +1,4805 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.039010752615,
+          46.7061090862918
+        ]
+      },
+      "properties": {
+        "point_name": "2",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03900469506,
+          46.7060012476497
+        ]
+      },
+      "properties": {
+        "point_name": "5",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.039000656709,
+          46.7059293552201
+        ]
+      },
+      "properties": {
+        "point_name": "7",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038998637539,
+          46.7058934090049
+        ]
+      },
+      "properties": {
+        "point_name": "8",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038996618373,
+          46.7058574627894
+        ]
+      },
+      "properties": {
+        "point_name": "9",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038994599211,
+          46.7058215165736
+        ]
+      },
+      "properties": {
+        "point_name": "10",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038990560899,
+          46.705749624141
+        ]
+      },
+      "properties": {
+        "point_name": "12",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038988541749,
+          46.7057136779244
+        ]
+      },
+      "properties": {
+        "point_name": "13",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038986522602,
+          46.7056777317074
+        ]
+      },
+      "properties": {
+        "point_name": "14",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03898450346,
+          46.7056417854901
+        ]
+      },
+      "properties": {
+        "point_name": "15",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038982484321,
+          46.7056058392725
+        ]
+      },
+      "properties": {
+        "point_name": "16",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038980465186,
+          46.7055698930547
+        ]
+      },
+      "properties": {
+        "point_name": "17",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038978446055,
+          46.7055339468365
+        ]
+      },
+      "properties": {
+        "point_name": "18",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038974407805,
+          46.7054620543993
+        ]
+      },
+      "properties": {
+        "point_name": "20",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03897036957,
+          46.7053901619609
+        ]
+      },
+      "properties": {
+        "point_name": "22",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038968350458,
+          46.7053542157413
+        ]
+      },
+      "properties": {
+        "point_name": "23",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038966331351,
+          46.7053182695213
+        ]
+      },
+      "properties": {
+        "point_name": "24",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038962293147,
+          46.7052463770806
+        ]
+      },
+      "properties": {
+        "point_name": "26",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038960517836,
+          46.7061464215248
+        ]
+      },
+      "properties": {
+        "point_name": "31",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038960274051,
+          46.7052104308598
+        ]
+      },
+      "properties": {
+        "point_name": "27",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038958254959,
+          46.7051744846387
+        ]
+      },
+      "properties": {
+        "point_name": "28",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03895623587,
+          46.7051385384173
+        ]
+      },
+      "properties": {
+        "point_name": "29",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038954460372,
+          46.7060385828784
+        ]
+      },
+      "properties": {
+        "point_name": "34",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038954216786,
+          46.7051025921956
+        ]
+      },
+      "properties": {
+        "point_name": "30",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038950422083,
+          46.7059666904459
+        ]
+      },
+      "properties": {
+        "point_name": "36",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038948402944,
+          46.7059307442293
+        ]
+      },
+      "properties": {
+        "point_name": "37",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038946383809,
+          46.7058947980123
+        ]
+      },
+      "properties": {
+        "point_name": "38",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038944364677,
+          46.705858851795
+        ]
+      },
+      "properties": {
+        "point_name": "39",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038938307307,
+          46.7057510131415
+        ]
+      },
+      "properties": {
+        "point_name": "42",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038934269079,
+          46.7056791207044
+        ]
+      },
+      "properties": {
+        "point_name": "44",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038930230867,
+          46.7056072282661
+        ]
+      },
+      "properties": {
+        "point_name": "46",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038928211767,
+          46.7055712820465
+        ]
+      },
+      "properties": {
+        "point_name": "47",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038924173578,
+          46.7054993896064
+        ]
+      },
+      "properties": {
+        "point_name": "49",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038922154489,
+          46.7054634433859
+        ]
+      },
+      "properties": {
+        "point_name": "50",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038920135405,
+          46.7054274971651
+        ]
+      },
+      "properties": {
+        "point_name": "51",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038918116324,
+          46.705391550944
+        ]
+      },
+      "properties": {
+        "point_name": "52",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038916097247,
+          46.7053556047227
+        ]
+      },
+      "properties": {
+        "point_name": "53",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038914078174,
+          46.705319658501
+        ]
+      },
+      "properties": {
+        "point_name": "54",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038910040039,
+          46.7052477660568
+        ]
+      },
+      "properties": {
+        "point_name": "56",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038908263859,
+          46.7061478105206
+        ]
+      },
+      "properties": {
+        "point_name": "61",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03890600192,
+          46.7051758736114
+        ]
+      },
+      "properties": {
+        "point_name": "58",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038904225616,
+          46.7060759180864
+        ]
+      },
+      "properties": {
+        "point_name": "63",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038903982866,
+          46.7051399273883
+        ]
+      },
+      "properties": {
+        "point_name": "59",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.0389022065,
+          46.7060399718689
+        ]
+      },
+      "properties": {
+        "point_name": "64",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038900187387,
+          46.7060040256511
+        ]
+      },
+      "properties": {
+        "point_name": "65",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038898168279,
+          46.705968079433
+        ]
+      },
+      "properties": {
+        "point_name": "66",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038896149175,
+          46.7059321332146
+        ]
+      },
+      "properties": {
+        "point_name": "67",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038894130074,
+          46.7058961869959
+        ]
+      },
+      "properties": {
+        "point_name": "68",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038892110978,
+          46.7058602407769
+        ]
+      },
+      "properties": {
+        "point_name": "69",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038890091885,
+          46.7058242945576
+        ]
+      },
+      "properties": {
+        "point_name": "70",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038888072796,
+          46.7057883483381
+        ]
+      },
+      "properties": {
+        "point_name": "71",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038886053711,
+          46.7057524021182
+        ]
+      },
+      "properties": {
+        "point_name": "72",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03888403463,
+          46.705716455898
+        ]
+      },
+      "properties": {
+        "point_name": "73",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038882015552,
+          46.7056805096776
+        ]
+      },
+      "properties": {
+        "point_name": "74",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03887797741,
+          46.7056086172358
+        ]
+      },
+      "properties": {
+        "point_name": "76",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038875958344,
+          46.7055726710144
+        ]
+      },
+      "properties": {
+        "point_name": "77",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03886990117,
+          46.7054648323487
+        ]
+      },
+      "properties": {
+        "point_name": "80",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03886788212,
+          46.7054288861261
+        ]
+      },
+      "properties": {
+        "point_name": "81",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038865863074,
+          46.7053929399033
+        ]
+      },
+      "properties": {
+        "point_name": "82",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038859805958,
+          46.7052851012332
+        ]
+      },
+      "properties": {
+        "point_name": "85",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038857786927,
+          46.7052491550092
+        ]
+      },
+      "properties": {
+        "point_name": "86",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038856009879,
+          46.7061491994925
+        ]
+      },
+      "properties": {
+        "point_name": "91",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03885399079,
+          46.7061132532738
+        ]
+      },
+      "properties": {
+        "point_name": "92",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038851971704,
+          46.7060773070549
+        ]
+      },
+      "properties": {
+        "point_name": "93",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038849952623,
+          46.7060413608356
+        ]
+      },
+      "properties": {
+        "point_name": "94",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038847933545,
+          46.7060054146161
+        ]
+      },
+      "properties": {
+        "point_name": "95",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038845914472,
+          46.7059694683962
+        ]
+      },
+      "properties": {
+        "point_name": "96",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038843895402,
+          46.7059335221761
+        ]
+      },
+      "properties": {
+        "point_name": "97",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038841876336,
+          46.7058975759557
+        ]
+      },
+      "properties": {
+        "point_name": "98",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038839857274,
+          46.705861629735
+        ]
+      },
+      "properties": {
+        "point_name": "99",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038837838216,
+          46.7058256835139
+        ]
+      },
+      "properties": {
+        "point_name": "100",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038835819161,
+          46.7057897372926
+        ]
+      },
+      "properties": {
+        "point_name": "101",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038833800111,
+          46.705753791071
+        ]
+      },
+      "properties": {
+        "point_name": "102",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038831781064,
+          46.7057178448491
+        ]
+      },
+      "properties": {
+        "point_name": "103",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038827742983,
+          46.7056459524044
+        ]
+      },
+      "properties": {
+        "point_name": "105",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038825723948,
+          46.7056100061817
+        ]
+      },
+      "properties": {
+        "point_name": "106",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038823704917,
+          46.7055740599586
+        ]
+      },
+      "properties": {
+        "point_name": "107",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03882168589,
+          46.7055381137352
+        ]
+      },
+      "properties": {
+        "point_name": "108",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038819666866,
+          46.7055021675116
+        ]
+      },
+      "properties": {
+        "point_name": "109",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038815628831,
+          46.7054302750634
+        ]
+      },
+      "properties": {
+        "point_name": "111",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03881360982,
+          46.7053943288388
+        ]
+      },
+      "properties": {
+        "point_name": "112",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038809571808,
+          46.7053224363889
+        ]
+      },
+      "properties": {
+        "point_name": "114",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038807552808,
+          46.7052864901634
+        ]
+      },
+      "properties": {
+        "point_name": "115",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038805533812,
+          46.7052505439377
+        ]
+      },
+      "properties": {
+        "point_name": "116",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038803755895,
+          46.7061505884405
+        ]
+      },
+      "properties": {
+        "point_name": "121",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03880173684,
+          46.7061146422201
+        ]
+      },
+      "properties": {
+        "point_name": "122",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038801495831,
+          46.7051786514854
+        ]
+      },
+      "properties": {
+        "point_name": "118",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038799717789,
+          46.7060786959994
+        ]
+      },
+      "properties": {
+        "point_name": "123",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038799476846,
+          46.7051427052588
+        ]
+      },
+      "properties": {
+        "point_name": "119",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.0387956797,
+          46.7060068035572
+        ]
+      },
+      "properties": {
+        "point_name": "125",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038791641625,
+          46.7059349111138
+        ]
+      },
+      "properties": {
+        "point_name": "127",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038789622594,
+          46.7058989648916
+        ]
+      },
+      "properties": {
+        "point_name": "128",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038785584543,
+          46.7058270724464
+        ]
+      },
+      "properties": {
+        "point_name": "130",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038783565523,
+          46.7057911262233
+        ]
+      },
+      "properties": {
+        "point_name": "131",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038781546507,
+          46.70575518
+        ]
+      },
+      "properties": {
+        "point_name": "132",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038779527495,
+          46.7057192337764
+        ]
+      },
+      "properties": {
+        "point_name": "133",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038775489483,
+          46.7056473413282
+        ]
+      },
+      "properties": {
+        "point_name": "135",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038773470483,
+          46.7056113951037
+        ]
+      },
+      "properties": {
+        "point_name": "136",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038771451486,
+          46.7055754488789
+        ]
+      },
+      "properties": {
+        "point_name": "137",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038769432494,
+          46.7055395026538
+        ]
+      },
+      "properties": {
+        "point_name": "138",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038767413505,
+          46.7055035564284
+        ]
+      },
+      "properties": {
+        "point_name": "139",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03876539452,
+          46.7054676102027
+        ]
+      },
+      "properties": {
+        "point_name": "140",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038759337589,
+          46.7053597715239
+        ]
+      },
+      "properties": {
+        "point_name": "143",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038757318619,
+          46.705323825297
+        ]
+      },
+      "properties": {
+        "point_name": "144",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038755299654,
+          46.7052878790699
+        ]
+      },
+      "properties": {
+        "point_name": "145",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038753280692,
+          46.7052519328424
+        ]
+      },
+      "properties": {
+        "point_name": "146",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038751501907,
+          46.7061519773648
+        ]
+      },
+      "properties": {
+        "point_name": "151",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038751261734,
+          46.7052159866147
+        ]
+      },
+      "properties": {
+        "point_name": "147",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038749482887,
+          46.7061160311426
+        ]
+      },
+      "properties": {
+        "point_name": "152",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038749242781,
+          46.7051800403867
+        ]
+      },
+      "properties": {
+        "point_name": "148",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038747223831,
+          46.7051440941583
+        ]
+      },
+      "properties": {
+        "point_name": "149",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038745204884,
+          46.7051081479297
+        ]
+      },
+      "properties": {
+        "point_name": "150",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03874342585,
+          46.7060081924745
+        ]
+      },
+      "properties": {
+        "point_name": "155",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038739387845,
+          46.7059363000276
+        ]
+      },
+      "properties": {
+        "point_name": "157",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038737368848,
+          46.7059003538037
+        ]
+      },
+      "properties": {
+        "point_name": "158",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038733330866,
+          46.705828461355
+        ]
+      },
+      "properties": {
+        "point_name": "160",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038731311881,
+          46.7057925151302
+        ]
+      },
+      "properties": {
+        "point_name": "161",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038727273922,
+          46.7057206226798
+        ]
+      },
+      "properties": {
+        "point_name": "163",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038725254949,
+          46.7056846764541
+        ]
+      },
+      "properties": {
+        "point_name": "164",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038723235979,
+          46.7056487302282
+        ]
+      },
+      "properties": {
+        "point_name": "165",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038721217013,
+          46.7056127840019
+        ]
+      },
+      "properties": {
+        "point_name": "166",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038719198052,
+          46.7055768377754
+        ]
+      },
+      "properties": {
+        "point_name": "167",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038717179094,
+          46.7055408915486
+        ]
+      },
+      "properties": {
+        "point_name": "168",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038715160139,
+          46.7055049453215
+        ]
+      },
+      "properties": {
+        "point_name": "169",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038711122243,
+          46.7054330528663
+        ]
+      },
+      "properties": {
+        "point_name": "171",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.0387091033,
+          46.7053971066383
+        ]
+      },
+      "properties": {
+        "point_name": "172",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038707084362,
+          46.70536116041
+        ]
+      },
+      "properties": {
+        "point_name": "173",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038703046496,
+          46.7052892679525
+        ]
+      },
+      "properties": {
+        "point_name": "175",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038701027569,
+          46.7052533217233
+        ]
+      },
+      "properties": {
+        "point_name": "176",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038699008646,
+          46.7052173754938
+        ]
+      },
+      "properties": {
+        "point_name": "177",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038696989726,
+          46.7051814292641
+        ]
+      },
+      "properties": {
+        "point_name": "178",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038694970811,
+          46.705145483034
+        ]
+      },
+      "properties": {
+        "point_name": "179",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03869319097,
+          46.7060455275927
+        ]
+      },
+      "properties": {
+        "point_name": "184",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038692951899,
+          46.7051095368036
+        ]
+      },
+      "properties": {
+        "point_name": "180",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038691171996,
+          46.706009581368
+        ]
+      },
+      "properties": {
+        "point_name": "185",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03868713406,
+          46.7059376889176
+        ]
+      },
+      "properties": {
+        "point_name": "187",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03868309614,
+          46.705865796466
+        ]
+      },
+      "properties": {
+        "point_name": "189",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038679058235,
+          46.7057939040133
+        ]
+      },
+      "properties": {
+        "point_name": "191",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038677039288,
+          46.7057579577865
+        ]
+      },
+      "properties": {
+        "point_name": "192",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038675020345,
+          46.7057220115594
+        ]
+      },
+      "properties": {
+        "point_name": "193",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038670982472,
+          46.7056501191043
+        ]
+      },
+      "properties": {
+        "point_name": "195",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038666944613,
+          46.7055782266481
+        ]
+      },
+      "properties": {
+        "point_name": "197",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03866290677,
+          46.7055063341906
+        ]
+      },
+      "properties": {
+        "point_name": "199",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038658868943,
+          46.705434441732
+        ]
+      },
+      "properties": {
+        "point_name": "201",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038656850035,
+          46.7053984955023
+        ]
+      },
+      "properties": {
+        "point_name": "202",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038654831131,
+          46.7053625492723
+        ]
+      },
+      "properties": {
+        "point_name": "203",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03865281223,
+          46.7053266030419
+        ]
+      },
+      "properties": {
+        "point_name": "204",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038648774442,
+          46.7052547105804
+        ]
+      },
+      "properties": {
+        "point_name": "206",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038646993919,
+          46.7061547551418
+        ]
+      },
+      "properties": {
+        "point_name": "211",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038646755553,
+          46.7052187643492
+        ]
+      },
+      "properties": {
+        "point_name": "207",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038644974968,
+          46.7061188089162
+        ]
+      },
+      "properties": {
+        "point_name": "212",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038644736668,
+          46.7051828181177
+        ]
+      },
+      "properties": {
+        "point_name": "208",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038642956021,
+          46.7060828626903
+        ]
+      },
+      "properties": {
+        "point_name": "213",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038642717787,
+          46.7051468718859
+        ]
+      },
+      "properties": {
+        "point_name": "209",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038640937078,
+          46.7060469164641
+        ]
+      },
+      "properties": {
+        "point_name": "214",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038640698911,
+          46.7051109256537
+        ]
+      },
+      "properties": {
+        "point_name": "210",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038636899204,
+          46.7059750240108
+        ]
+      },
+      "properties": {
+        "point_name": "216",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038634880272,
+          46.7059390777838
+        ]
+      },
+      "properties": {
+        "point_name": "217",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038632861345,
+          46.7059031315564
+        ]
+      },
+      "properties": {
+        "point_name": "218",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038628823501,
+          46.7058312391008
+        ]
+      },
+      "properties": {
+        "point_name": "220",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038626804585,
+          46.7057952928726
+        ]
+      },
+      "properties": {
+        "point_name": "221",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038624785673,
+          46.705759346644
+        ]
+      },
+      "properties": {
+        "point_name": "222",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038622766765,
+          46.7057234004152
+        ]
+      },
+      "properties": {
+        "point_name": "223",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03862074786,
+          46.7056874541861
+        ]
+      },
+      "properties": {
+        "point_name": "224",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03861872896,
+          46.7056515079566
+        ]
+      },
+      "properties": {
+        "point_name": "225",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038616710063,
+          46.7056155617269
+        ]
+      },
+      "properties": {
+        "point_name": "226",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038614691171,
+          46.7055796154969
+        ]
+      },
+      "properties": {
+        "point_name": "227",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038606615638,
+          46.7054358305739
+        ]
+      },
+      "properties": {
+        "point_name": "231",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038604596765,
+          46.7053998843425
+        ]
+      },
+      "properties": {
+        "point_name": "232",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03860055903,
+          46.7053279918786
+        ]
+      },
+      "properties": {
+        "point_name": "234",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038598540168,
+          46.7052920456463
+        ]
+      },
+      "properties": {
+        "point_name": "235",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038594739919,
+          46.7061561439945
+        ]
+      },
+      "properties": {
+        "point_name": "241",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038594502456,
+          46.7052201531807
+        ]
+      },
+      "properties": {
+        "point_name": "237",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038592721003,
+          46.7061201977672
+        ]
+      },
+      "properties": {
+        "point_name": "242",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038590702091,
+          46.7060842515396
+        ]
+      },
+      "properties": {
+        "point_name": "243",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03859046476,
+          46.7051482607139
+        ]
+      },
+      "properties": {
+        "point_name": "239",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038588445918,
+          46.7051123144801
+        ]
+      },
+      "properties": {
+        "point_name": "240",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038586664278,
+          46.7060123590834
+        ]
+      },
+      "properties": {
+        "point_name": "245",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038584645377,
+          46.7059764128549
+        ]
+      },
+      "properties": {
+        "point_name": "246",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038576569813,
+          46.7058326279379
+        ]
+      },
+      "properties": {
+        "point_name": "250",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038574550931,
+          46.705796681708
+        ]
+      },
+      "properties": {
+        "point_name": "251",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038572532054,
+          46.7057607354777
+        ]
+      },
+      "properties": {
+        "point_name": "252",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03856849431,
+          46.7056888430163
+        ]
+      },
+      "properties": {
+        "point_name": "254",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038566475444,
+          46.7056528967851
+        ]
+      },
+      "properties": {
+        "point_name": "255",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038562437724,
+          46.7055810043219
+        ]
+      },
+      "properties": {
+        "point_name": "257",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03855840002,
+          46.7055091118576
+        ]
+      },
+      "properties": {
+        "point_name": "259",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038556381173,
+          46.7054731656249
+        ]
+      },
+      "properties": {
+        "point_name": "260",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038552343492,
+          46.7054012731588
+        ]
+      },
+      "properties": {
+        "point_name": "262",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038550324657,
+          46.7053653269253
+        ]
+      },
+      "properties": {
+        "point_name": "263",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038546286999,
+          46.7052934344574
+        ]
+      },
+      "properties": {
+        "point_name": "265",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038542249356,
+          46.7052215419883
+        ]
+      },
+      "properties": {
+        "point_name": "267",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038540467034,
+          46.7061215865944
+        ]
+      },
+      "properties": {
+        "point_name": "272",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038540230541,
+          46.7051855957533
+        ]
+      },
+      "properties": {
+        "point_name": "268",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038538448156,
+          46.706085640365
+        ]
+      },
+      "properties": {
+        "point_name": "273",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038536192921,
+          46.7051137032825
+        ]
+      },
+      "properties": {
+        "point_name": "270",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038528353826,
+          46.7059059092138
+        ]
+      },
+      "properties": {
+        "point_name": "278",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038516240756,
+          46.7056902318226
+        ]
+      },
+      "properties": {
+        "point_name": "284",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038514221925,
+          46.7056542855898
+        ]
+      },
+      "properties": {
+        "point_name": "285",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038512203098,
+          46.7056183393566
+        ]
+      },
+      "properties": {
+        "point_name": "286",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038508165455,
+          46.7055464468893
+        ]
+      },
+      "properties": {
+        "point_name": "288",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038504127827,
+          46.7054745544209
+        ]
+      },
+      "properties": {
+        "point_name": "290",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038502109019,
+          46.7054386081862
+        ]
+      },
+      "properties": {
+        "point_name": "291",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038500090215,
+          46.7054026619513
+        ]
+      },
+      "properties": {
+        "point_name": "292",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038498071414,
+          46.7053667157161
+        ]
+      },
+      "properties": {
+        "point_name": "293",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038494033825,
+          46.7052948232447
+        ]
+      },
+      "properties": {
+        "point_name": "295",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038492015037,
+          46.7052588770086
+        ]
+      },
+      "properties": {
+        "point_name": "296",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038489996252,
+          46.7052229307722
+        ]
+      },
+      "properties": {
+        "point_name": "297",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038487977471,
+          46.7051869845354
+        ]
+      },
+      "properties": {
+        "point_name": "298",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038485958694,
+          46.7051510382984
+        ]
+      },
+      "properties": {
+        "point_name": "299",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038483939921,
+          46.7051150920611
+        ]
+      },
+      "properties": {
+        "point_name": "300",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.039012771808,
+          46.7061450325053
+        ]
+      },
+      "properties": {
+        "point_name": "1",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.039008733426,
+          46.7060731400781
+        ]
+      },
+      "properties": {
+        "point_name": "3",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.039006714241,
+          46.706037193864
+        ]
+      },
+      "properties": {
+        "point_name": "4",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.039002675882,
+          46.705965301435
+        ]
+      },
+      "properties": {
+        "point_name": "6",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038992580053,
+          46.7057855703574
+        ]
+      },
+      "properties": {
+        "point_name": "11",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038976426928,
+          46.705498000618
+        ]
+      },
+      "properties": {
+        "point_name": "19",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038972388685,
+          46.7054261081802
+        ]
+      },
+      "properties": {
+        "point_name": "21",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038964312247,
+          46.7052823233011
+        ]
+      },
+      "properties": {
+        "point_name": "25",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038958498677,
+          46.7061104753096
+        ]
+      },
+      "properties": {
+        "point_name": "32",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038956479523,
+          46.7060745290942
+        ]
+      },
+      "properties": {
+        "point_name": "33",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038952441226,
+          46.7060026366623
+        ]
+      },
+      "properties": {
+        "point_name": "35",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03894234555,
+          46.7058229055775
+        ]
+      },
+      "properties": {
+        "point_name": "40",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038940326426,
+          46.7057869593597
+        ]
+      },
+      "properties": {
+        "point_name": "41",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038936288191,
+          46.7057150669231
+        ]
+      },
+      "properties": {
+        "point_name": "43",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038932249971,
+          46.7056431744854
+        ]
+      },
+      "properties": {
+        "point_name": "45",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038926192671,
+          46.7055353358266
+        ]
+      },
+      "properties": {
+        "point_name": "48",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038912059104,
+          46.7052837122791
+        ]
+      },
+      "properties": {
+        "point_name": "55",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038908020978,
+          46.7052118198342
+        ]
+      },
+      "properties": {
+        "point_name": "57",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038906244735,
+          46.7061118643036
+        ]
+      },
+      "properties": {
+        "point_name": "62",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038901963816,
+          46.7051039811649
+        ]
+      },
+      "properties": {
+        "point_name": "60",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038879996479,
+          46.7056445634568
+        ]
+      },
+      "properties": {
+        "point_name": "75",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038873939282,
+          46.7055367247928
+        ]
+      },
+      "properties": {
+        "point_name": "78",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038871920224,
+          46.7055007785709
+        ]
+      },
+      "properties": {
+        "point_name": "79",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038863844031,
+          46.7053569936802
+        ]
+      },
+      "properties": {
+        "point_name": "83",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038861824993,
+          46.7053210474568
+        ]
+      },
+      "properties": {
+        "point_name": "84",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.0388557679,
+          46.7052132087849
+        ]
+      },
+      "properties": {
+        "point_name": "87",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038853748877,
+          46.7051772625603
+        ]
+      },
+      "properties": {
+        "point_name": "88",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038851729858,
+          46.7051413163354
+        ]
+      },
+      "properties": {
+        "point_name": "89",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038849710843,
+          46.7051053701103
+        ]
+      },
+      "properties": {
+        "point_name": "90",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038829762022,
+          46.7056818986269
+        ]
+      },
+      "properties": {
+        "point_name": "104",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038817647847,
+          46.7054662212876
+        ]
+      },
+      "properties": {
+        "point_name": "110",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038811590812,
+          46.705358382614
+        ]
+      },
+      "properties": {
+        "point_name": "113",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038803514819,
+          46.7052145977117
+        ]
+      },
+      "properties": {
+        "point_name": "117",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038797698743,
+          46.7060427497785
+        ]
+      },
+      "properties": {
+        "point_name": "124",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038797457866,
+          46.7051067590319
+        ]
+      },
+      "properties": {
+        "point_name": "120",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038793660661,
+          46.7059708573356
+        ]
+      },
+      "properties": {
+        "point_name": "126",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038787603567,
+          46.7058630186691
+        ]
+      },
+      "properties": {
+        "point_name": "129",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038777508487,
+          46.7056832875525
+        ]
+      },
+      "properties": {
+        "point_name": "134",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038763375539,
+          46.7054316639768
+        ]
+      },
+      "properties": {
+        "point_name": "141",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038761356562,
+          46.7053957177505
+        ]
+      },
+      "properties": {
+        "point_name": "142",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038747463871,
+          46.7060800849202
+        ]
+      },
+      "properties": {
+        "point_name": "153",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038745444858,
+          46.7060441386975
+        ]
+      },
+      "properties": {
+        "point_name": "154",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038741406845,
+          46.7059722462512
+        ]
+      },
+      "properties": {
+        "point_name": "156",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038735349855,
+          46.7058644075795
+        ]
+      },
+      "properties": {
+        "point_name": "159",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.0387292929,
+          46.7057565689052
+        ]
+      },
+      "properties": {
+        "point_name": "162",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038713141189,
+          46.705468999094
+        ]
+      },
+      "properties": {
+        "point_name": "170",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038705065427,
+          46.7053252141814
+        ]
+      },
+      "properties": {
+        "point_name": "174",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038699247915,
+          46.7061533662652
+        ]
+      },
+      "properties": {
+        "point_name": "181",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038697228929,
+          46.7061174200413
+        ]
+      },
+      "properties": {
+        "point_name": "182",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038695209948,
+          46.7060814738172
+        ]
+      },
+      "properties": {
+        "point_name": "183",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038689153026,
+          46.7059736351429
+        ]
+      },
+      "properties": {
+        "point_name": "186",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038685115098,
+          46.705901742692
+        ]
+      },
+      "properties": {
+        "point_name": "188",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038681077186,
+          46.7058298502398
+        ]
+      },
+      "properties": {
+        "point_name": "190",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038673001407,
+          46.705686065332
+        ]
+      },
+      "properties": {
+        "point_name": "194",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03866896354,
+          46.7056141728763
+        ]
+      },
+      "properties": {
+        "point_name": "196",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03866492569,
+          46.7055422804195
+        ]
+      },
+      "properties": {
+        "point_name": "198",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038660887854,
+          46.7054703879615
+        ]
+      },
+      "properties": {
+        "point_name": "200",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038650793334,
+          46.7052906568113
+        ]
+      },
+      "properties": {
+        "point_name": "205",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038638918139,
+          46.7060109702376
+        ]
+      },
+      "properties": {
+        "point_name": "215",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038630842421,
+          46.7058671853288
+        ]
+      },
+      "properties": {
+        "point_name": "219",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038612672282,
+          46.7055436692666
+        ]
+      },
+      "properties": {
+        "point_name": "228",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038610653397,
+          46.705507723036
+        ]
+      },
+      "properties": {
+        "point_name": "229",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038608634516,
+          46.7054717768051
+        ]
+      },
+      "properties": {
+        "point_name": "230",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038602577896,
+          46.7053639381107
+        ]
+      },
+      "properties": {
+        "point_name": "233",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03859652131,
+          46.7052560994136
+        ]
+      },
+      "properties": {
+        "point_name": "236",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038592483606,
+          46.7051842069474
+        ]
+      },
+      "properties": {
+        "point_name": "238",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038588683182,
+          46.7060483053116
+        ]
+      },
+      "properties": {
+        "point_name": "244",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03858262648,
+          46.7059404666261
+        ]
+      },
+      "properties": {
+        "point_name": "247",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038580607587,
+          46.705904520397
+        ]
+      },
+      "properties": {
+        "point_name": "248",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038578588698,
+          46.7058685741676
+        ]
+      },
+      "properties": {
+        "point_name": "249",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03857051318,
+          46.7057247892471
+        ]
+      },
+      "properties": {
+        "point_name": "253",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038564456582,
+          46.7056169505537
+        ]
+      },
+      "properties": {
+        "point_name": "256",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03856041887,
+          46.7055450580899
+        ]
+      },
+      "properties": {
+        "point_name": "258",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038554362331,
+          46.705437219392
+        ]
+      },
+      "properties": {
+        "point_name": "261",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038548305826,
+          46.7053293806915
+        ]
+      },
+      "properties": {
+        "point_name": "264",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038544268175,
+          46.705257488223
+        ]
+      },
+      "properties": {
+        "point_name": "266",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038542485916,
+          46.7061575328234
+        ]
+      },
+      "properties": {
+        "point_name": "271",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038538211729,
+          46.7051496495181
+        ]
+      },
+      "properties": {
+        "point_name": "269",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038536429282,
+          46.7060496941354
+        ]
+      },
+      "properties": {
+        "point_name": "274",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038534410412,
+          46.7060137479054
+        ]
+      },
+      "properties": {
+        "point_name": "275",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038532391546,
+          46.7059778016752
+        ]
+      },
+      "properties": {
+        "point_name": "276",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038530372684,
+          46.7059418554446
+        ]
+      },
+      "properties": {
+        "point_name": "277",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038526334971,
+          46.7058699629827
+        ]
+      },
+      "properties": {
+        "point_name": "279",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.03852431612,
+          46.7058340167513
+        ]
+      },
+      "properties": {
+        "point_name": "280",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038522297274,
+          46.7057980705195
+        ]
+      },
+      "properties": {
+        "point_name": "281",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038520278431,
+          46.7057621242875
+        ]
+      },
+      "properties": {
+        "point_name": "282",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038518259592,
+          46.7057261780552
+        ]
+      },
+      "properties": {
+        "point_name": "283",
+        "color": "red",
+        "concentration": "high",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038510184274,
+          46.7055823931231
+        ]
+      },
+      "properties": {
+        "point_name": "287",
+        "color": "blue",
+        "concentration": "high",
+        "spray_size_m": 0.10000000149011612
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038506146639,
+          46.7055105006553
+        ]
+      },
+      "properties": {
+        "point_name": "289",
+        "color": "red",
+        "concentration": "low",
+        "spray_size_m": 0.5
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.038496052618,
+          46.7053307694805
+        ]
+      },
+      "properties": {
+        "point_name": "294",
+        "color": "blue",
+        "concentration": "low",
+        "spray_size_m": 0.10000000149011612
+      }
+    }
+  ]
+}
