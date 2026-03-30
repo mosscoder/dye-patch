@@ -83,20 +83,26 @@ def create_lora_model(use_lora=False, device="cuda"):
     if use_lora:
         from peft import LoraConfig, get_peft_model
 
-        # Find attention module names
-        target_modules = []
-        for name, _ in backbone.named_modules():
-            if any(k in name for k in ["query", "key", "value", "qkv"]):
-                target_modules.append(name)
+        # Find all Linear layers in attention blocks for LoRA targets
+        target_modules = set()
+        for name, module in backbone.named_modules():
+            if isinstance(module, nn.Linear) and "attention" in name:
+                target_modules.add(name)
 
-        # If no specific q/k/v found, try common patterns
         if not target_modules:
-            target_modules = ["attention.attention"]
+            # Fallback: print all module names for debugging
+            print("WARNING: No attention Linear layers found. Module names:")
+            for name, mod in backbone.named_modules():
+                if isinstance(mod, nn.Linear):
+                    print(f"  {name}")
+            raise ValueError("Could not find LoRA target modules")
+
+        print(f"  LoRA targets: {sorted(target_modules)[:5]}... ({len(target_modules)} total)")
 
         lora_config = LoraConfig(
             r=LORA_R,
             lora_alpha=LORA_ALPHA,
-            target_modules=target_modules[:1] if len(target_modules) > 50 else target_modules,
+            target_modules=list(target_modules),
             lora_dropout=0.0,
             bias="none",
         )

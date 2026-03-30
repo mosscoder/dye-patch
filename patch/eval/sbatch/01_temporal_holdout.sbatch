@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
 #SBATCH --gres=gpu:1
-#SBATCH --exclude=babel-m5-32,babel-l5-16,babel-m9-20
+#SBATCH --exclude=babel-l5-16,babel-l5-20,babel-m5-32,babel-m9-16,babel-m9-20,babel-n9-20
 #SBATCH --time=4:00:00
 #SBATCH --output=/home/kdoherty/logs/dye_patch/eval/temporal/%A_%a.out
 #SBATCH --error=/home/kdoherty/logs/dye_patch/eval/temporal/%A_%a.err
