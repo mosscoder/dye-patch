@@ -1,25 +1,26 @@
 """
-Synthetic dye overlay: wobbly circles with per-patch KNN-matched HSV deltas.
+Synthetic dye overlay: wobbly circles with per-patch KNN-matched CIELAB deltas.
 
-Each call places 1-10 blobs at random coordinates. Each blob:
+Each call places 1 blob at a random coordinate. The blob:
 - Is a roughly circular shape with sinusoidal boundary wobble
 - Has a random diameter between 0.1 and 1.0 meters
-- Gets per-patch HSV deltas matched by nearest-neighbor to a lookup table
+- Gets per-patch CIELAB deltas matched by nearest-neighbor to a lookup table
   built from real sprayed tiles in the training fold
 - Deltas are bilinearly interpolated to pixel resolution for smooth transitions
 - Edges are Gaussian-feathered (sigma=3px)
+- Shadow pixels (L* < 5th percentile) excluded from patch mean calculations
 
 The lookup table is built at init from the train fold's 0.5m sprayed tiles,
 pairing jittered dye boxes with border-ring vegetation patches.
 """
 
-import colorsys
 import math
 import random
 
 import numpy as np
 from scipy.ndimage import gaussian_filter, zoom
 from scipy.spatial import cKDTree
+from skimage.color import rgb2lab, lab2rgb
 
 from patch.utils.config import (
     BLOB_SIZE_RANGE_PX,
@@ -80,32 +81,34 @@ def _make_wobbly_circle(
     return mask
 
 
-def _block_mean_hsv(img_uint8, y0, x0):
-    """Mean HSV of a 16x16 pixel block with circular hue mean."""
-    block = img_uint8[y0:y0 + VIT_PATCH_SIZE, x0:x0 + VIT_PATCH_SIZE]
+def _block_mean_lab(lab_image, y0, x0, shadow_L):
+    """Mean L*a*b* of a 16x16 block, excluding shadow pixels. Returns None if all shadow."""
+    block = lab_image[y0:y0 + VIT_PATCH_SIZE, x0:x0 + VIT_PATCH_SIZE]
     pixels = block.reshape(-1, 3)
-    hsv = np.array([colorsys.rgb_to_hsv(r / 255.0, g / 255.0, b / 255.0) for r, g, b in pixels])
 
-    hue_angles = hsv[:, 0] * 2 * np.pi
-    mean_hue = (np.arctan2(np.mean(np.sin(hue_angles)), np.mean(np.cos(hue_angles))) / (2 * np.pi)) % 1.0
-    return np.array([mean_hue, hsv[:, 1].mean(), hsv[:, 2].mean()])
+    lit = pixels[:, 0] >= shadow_L
+    if not lit.any():
+        return None
+
+    return pixels[lit].mean(axis=0)
 
 
-def _patch_mean_hsv_float(image_float, pr, pc):
-    """Mean HSV of a ViT patch from a float32 [0-1] RGB image."""
+def _patch_mean_lab(lab_image, pr, pc, shadow_L=0.0):
+    """Mean L*a*b* of a ViT patch, excluding shadow pixels."""
     y0 = pr * VIT_PATCH_SIZE
     x0 = pc * VIT_PATCH_SIZE
-    block = image_float[y0:y0 + VIT_PATCH_SIZE, x0:x0 + VIT_PATCH_SIZE]
+    block = lab_image[y0:y0 + VIT_PATCH_SIZE, x0:x0 + VIT_PATCH_SIZE]
     pixels = block.reshape(-1, 3)
-    hsv = np.array([colorsys.rgb_to_hsv(r, g, b) for r, g, b in pixels])
 
-    hue_angles = hsv[:, 0] * 2 * np.pi
-    mean_hue = (np.arctan2(np.mean(np.sin(hue_angles)), np.mean(np.cos(hue_angles))) / (2 * np.pi)) % 1.0
-    return np.array([mean_hue, hsv[:, 1].mean(), hsv[:, 2].mean()])
+    lit = pixels[:, 0] >= shadow_L
+    if not lit.any():
+        lit = np.ones(len(pixels), dtype=bool)
+
+    return pixels[lit].mean(axis=0)
 
 
 def _build_lookup_table(sprayed_tiles):
-    """Build per-color HSV delta lookup tables from 0.5m sprayed tiles.
+    """Build per-color CIELAB delta lookup tables from 0.5m sprayed tiles.
 
     Returns dict: {"red": (kd_tree, delta_array), "blue": (kd_tree, delta_array)}
     """
@@ -132,8 +135,10 @@ def _build_lookup_table(sprayed_tiles):
         if color not in ("red", "blue"):
             continue
 
-        img = np.array(row["image"].convert("RGB").resize((PRECROP_SIZE, PRECROP_SIZE)),
-                       dtype=np.uint8)
+        img_float = np.array(row["image"].convert("RGB").resize((PRECROP_SIZE, PRECROP_SIZE)),
+                             dtype=np.float32) / 255.0
+        lab_image = rgb2lab(img_float)
+        shadow_L = np.percentile(lab_image[:, :, 0].ravel(), 5)
 
         for vp_r, vp_c in veg_patches:
             # Jittered dye box
@@ -141,25 +146,20 @@ def _build_lookup_table(sprayed_tiles):
             dist = random.uniform(0, jitter_px)
             cy = int(center_px + dist * math.sin(angle))
             cx = int(center_px + dist * math.cos(angle))
-            H, W = img.shape[:2]
+            H, W = lab_image.shape[:2]
             y0 = max(0, min(cy - VIT_PATCH_SIZE // 2, H - VIT_PATCH_SIZE))
             x0 = max(0, min(cx - VIT_PATCH_SIZE // 2, W - VIT_PATCH_SIZE))
-            dye_hsv = _block_mean_hsv(img, y0, x0)
+            dye_lab = _block_mean_lab(lab_image, y0, x0, shadow_L)
+            if dye_lab is None:
+                continue
 
             # Veg patch
-            vy0 = vp_r * VIT_PATCH_SIZE
-            vx0 = vp_c * VIT_PATCH_SIZE
-            veg_hsv = _block_mean_hsv(img, vy0, vx0)
+            veg_lab = _block_mean_lab(lab_image, vp_r * VIT_PATCH_SIZE, vp_c * VIT_PATCH_SIZE, shadow_L)
+            if veg_lab is None:
+                continue
 
-            # HSV delta with circular hue wrapping
-            dh = dye_hsv[0] - veg_hsv[0]
-            if dh > 0.5:
-                dh -= 1.0
-            elif dh < -0.5:
-                dh += 1.0
-            delta = np.array([dh, dye_hsv[1] - veg_hsv[1], dye_hsv[2] - veg_hsv[2]])
-
-            results[color]["veg"].append(veg_hsv)
+            delta = dye_lab - veg_lab
+            results[color]["veg"].append(veg_lab)
             results[color]["delta"].append(delta)
 
     tables = {}
@@ -175,31 +175,22 @@ def _build_lookup_table(sprayed_tiles):
 
 
 class SyntheticDyeOverlay:
-    """Synthetic dye overlay with per-patch KNN-matched HSV deltas.
+    """Synthetic dye overlay with per-patch KNN-matched CIELAB deltas.
 
     Parameters
     ----------
     sprayed_dataset : HF Dataset or list
         Sprayed 0.5m tiles from the training fold. Used to build the
-        HSV delta lookup table at init.
-    min_blobs, max_blobs : int
-        Range for number of blobs per image (default 1-10).
+        CIELAB delta lookup table at init.
     """
 
-    def __init__(
-        self,
-        sprayed_dataset,
-        min_blobs: int = 1,
-        max_blobs: int = 10,
-    ):
+    def __init__(self, sprayed_dataset):
         # Filter to 0.5m sprayed tiles
         tiles = [r for r in sprayed_dataset
                  if abs(r.get("spray_size_m", 0) - SPRAY_SIZE_M) < 0.01
                  and r.get("color", "none") in ("red", "blue")]
 
         self.tables = _build_lookup_table(tiles)
-        self.min_blobs = min_blobs
-        self.max_blobs = max_blobs
         self.min_radius_px = BLOB_SIZE_RANGE_PX[0] / 2
         self.max_radius_px = BLOB_SIZE_RANGE_PX[1] / 2
 
@@ -208,14 +199,14 @@ class SyntheticDyeOverlay:
         print(f"  Overlay table built: red={n_red}, blue={n_blue} pairs")
 
     def __call__(self, image: np.ndarray, label_mask: np.ndarray, color_name: str | None = None):
-        """Apply synthetic dye overlay with per-patch KNN-matched HSV deltas.
+        """Apply synthetic dye overlay with per-patch KNN-matched CIELAB deltas.
 
         Parameters
         ----------
         image : np.ndarray
             RGB image, shape (H, W, 3), dtype uint8 or float32 [0-1].
         label_mask : np.ndarray
-            Existing 24x24 label mask (0=none, 1=red, 2=blue).
+            Existing label mask (0=none, 1=red, 2=blue).
         color_name : str or None
             "red" or "blue". If None, picks randomly.
 
@@ -237,65 +228,62 @@ class SyntheticDyeOverlay:
         if not is_float:
             image = image.astype(np.float32) / 255.0
 
-        n_blobs = random.randint(self.min_blobs, self.max_blobs)
-        final_mask = np.zeros((H, W), dtype=bool)
+        # Place one blob
+        cy = random.uniform(0, H - 1)
+        cx = random.uniform(0, W - 1)
+        base_radius = random.uniform(self.min_radius_px, self.max_radius_px)
 
-        for _ in range(n_blobs):
-            cy = random.uniform(0, H - 1)
-            cx = random.uniform(0, W - 1)
-            base_radius = random.uniform(self.min_radius_px, self.max_radius_px)
+        blob_mask = _make_wobbly_circle(cy, cx, base_radius, H, W)
+        if not blob_mask.any():
+            if not is_float:
+                image = (np.clip(image, 0, 1) * 255).astype(np.uint8)
+            return image, label_mask
 
-            blob_mask = _make_wobbly_circle(cy, cx, base_radius, H, W)
-            blob_mask &= ~final_mask
-            if not blob_mask.any():
-                continue
+        # Soft feathered edges
+        soft_mask = gaussian_filter(blob_mask.astype(np.float32), sigma=BLOB_SIGMA)
 
-            # Soft feathered edges
-            soft_mask = gaussian_filter(blob_mask.astype(np.float32), sigma=BLOB_SIGMA)
+        # Convert to Lab
+        lab_image = rgb2lab(image)
+        shadow_L = np.percentile(lab_image[:, :, 0].ravel(), 5)
 
-            # Find covered ViT patches
-            fm = blob_mask[:GRID_DIM * VIT_PATCH_SIZE, :GRID_DIM * VIT_PATCH_SIZE]
-            fm_r = fm.reshape(GRID_DIM, VIT_PATCH_SIZE, GRID_DIM, VIT_PATCH_SIZE)
-            patch_hits = fm_r.any(axis=(1, 3))
+        # Find covered ViT patches
+        fm = blob_mask[:GRID_DIM * VIT_PATCH_SIZE, :GRID_DIM * VIT_PATCH_SIZE]
+        fm_r = fm.reshape(GRID_DIM, VIT_PATCH_SIZE, GRID_DIM, VIT_PATCH_SIZE)
+        patch_hits = fm_r.any(axis=(1, 3))
 
-            # Per-patch KNN lookup
-            delta_grid = np.zeros((GRID_DIM, GRID_DIM, 3), dtype=np.float32)
-            for pr in range(GRID_DIM):
-                for pc in range(GRID_DIM):
-                    if not patch_hits[pr, pc]:
-                        continue
-                    patch_hsv = _patch_mean_hsv_float(image, pr, pc)
-                    _, idx = kd_tree.query(patch_hsv)
-                    delta_grid[pr, pc] = delta_table[idx]
+        # Per-patch KNN lookup in Lab space
+        delta_grid = np.zeros((GRID_DIM, GRID_DIM, 3), dtype=np.float32)
+        for pr in range(GRID_DIM):
+            for pc in range(GRID_DIM):
+                if not patch_hits[pr, pc]:
+                    continue
+                patch_lab = _patch_mean_lab(lab_image, pr, pc, shadow_L)
+                _, idx = kd_tree.query(patch_lab)
+                delta_grid[pr, pc] = delta_table[idx]
 
-            # Bilinear interpolate to pixel resolution
-            delta_field = zoom(delta_grid, (VIT_PATCH_SIZE, VIT_PATCH_SIZE, 1), order=1)
+        # Bilinear interpolate to pixel resolution
+        delta_field = zoom(delta_grid, (VIT_PATCH_SIZE, VIT_PATCH_SIZE, 1), order=1)
 
-            # Apply interpolated HSV delta with feathering
-            ys, xs = np.where(blob_mask)
-            ys_c = np.clip(ys, 0, delta_field.shape[0] - 1)
-            xs_c = np.clip(xs, 0, delta_field.shape[1] - 1)
+        # Apply Lab delta with feathering
+        ys, xs = np.where(blob_mask)
+        ys_c = np.clip(ys, 0, delta_field.shape[0] - 1)
+        xs_c = np.clip(xs, 0, delta_field.shape[1] - 1)
 
-            pixels = image[ys, xs]
-            hsv = np.array([colorsys.rgb_to_hsv(r, g, b) for r, g, b in pixels])
+        strength = soft_mask[ys, xs]
+        lab_image[ys, xs, 0] += delta_field[ys_c, xs_c, 0] * strength
+        lab_image[ys, xs, 1] += delta_field[ys_c, xs_c, 1] * strength
+        lab_image[ys, xs, 2] += delta_field[ys_c, xs_c, 2] * strength
 
-            strength = soft_mask[ys, xs]
-            hsv[:, 0] = (hsv[:, 0] + delta_field[ys_c, xs_c, 0] * strength) % 1.0
-            hsv[:, 1] = np.clip(hsv[:, 1] + delta_field[ys_c, xs_c, 1] * strength, 0, 1)
-            hsv[:, 2] = np.clip(hsv[:, 2] + delta_field[ys_c, xs_c, 2] * strength, 0, 1)
-
-            rgb = np.array([colorsys.hsv_to_rgb(h, s, v) for h, s, v in hsv])
-            image[ys, xs] = rgb.astype(np.float32)
-
-            final_mask |= blob_mask
+        # Convert back to RGB
+        image = np.clip(lab2rgb(lab_image), 0, 1).astype(np.float32)
 
         # Derive patch labels
-        fm = final_mask[:GRID_DIM * VIT_PATCH_SIZE, :GRID_DIM * VIT_PATCH_SIZE]
+        fm = blob_mask[:GRID_DIM * VIT_PATCH_SIZE, :GRID_DIM * VIT_PATCH_SIZE]
         fm = fm.reshape(GRID_DIM, VIT_PATCH_SIZE, GRID_DIM, VIT_PATCH_SIZE)
         patch_hits = fm.any(axis=(1, 3))
         label_mask[patch_hits] = COLOR_TO_LABEL[color_name]
 
         if not is_float:
-            image = (np.clip(image, 0, 1) * 255).astype(np.uint8)
+            image = (image * 255).astype(np.uint8)
 
         return image, label_mask

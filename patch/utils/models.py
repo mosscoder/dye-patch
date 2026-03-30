@@ -48,6 +48,7 @@ class DyePatchModel(nn.Module):
 def create_model(
     model_name: str = MODEL_NAME,
     num_classes: int = NUM_CLASSES,
+    grid_dim: int = GRID_DIM,
     dropout: float = 0.0,
     device: str = "cuda",
 ) -> DyePatchModel:
@@ -68,7 +69,7 @@ def create_model(
     layers.append(nn.Linear(hidden_size, num_classes))
     classifier = nn.Sequential(*layers)
 
-    model = DyePatchModel(backbone, classifier)
+    model = DyePatchModel(backbone, classifier, grid_dim=grid_dim)
 
     if isinstance(device, str):
         if device == "cuda" and torch.cuda.is_available():

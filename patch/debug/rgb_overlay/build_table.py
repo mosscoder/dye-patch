@@ -1,13 +1,13 @@
 """
-Build patch-level HSV delta lookup table.
+Build patch-level CIELAB delta lookup table.
 
 For each 0.5m sprayed tile, pairs a jittered 16x16 dye box (within 10cm
 of spray center) with each border-ring vegetation patch. Shadow pixels
-(V < 5th percentile of image) excluded from patch mean calculations.
+(L* < 10th percentile of image) excluded from patch mean calculations.
 
-Output: patch/debug/rgb_overlay/hsv_knn_deltas.npz
-  - red_veg: (N, 3) mean HSV of vegetation patches
-  - red_delta: (N, 3) HSV delta (dye - veg), hue wrapped
+Output: patch/debug/rgb_overlay/lab_knn_deltas.npz
+  - red_veg: (N, 3) mean L*a*b* of vegetation patches
+  - red_delta: (N, 3) Lab delta (dye - veg)
   - blue_veg / blue_delta: same for blue
 
 Usage:
@@ -19,65 +19,52 @@ import random
 
 import numpy as np
 from datasets import load_dataset
+from skimage.color import rgb2lab
 
 from patch.utils.config import GSD_M, GRID_DIM, HF_REPO, PRECROP_SIZE, VIT_PATCH_SIZE
 
 SEED = 42
 SPRAY_SIZE_M = 0.5
 SPRAY_JITTER_M = 0.10
-OUTPUT_PATH = "patch/debug/rgb_overlay/hsv_knn_deltas.npz"
+OUTPUT_PATH = "patch/debug/rgb_overlay/lab_knn_deltas.npz"
 
 
-def _rgb_to_hsv_vectorized(rgb):
-    """Vectorized RGB (float 0-1) to HSV. Input (N, 3), output (N, 3)."""
-    r, g, b = rgb[:, 0], rgb[:, 1], rgb[:, 2]
-    maxc = np.maximum(np.maximum(r, g), b)
-    minc = np.minimum(np.minimum(r, g), b)
-    v = maxc
-    diff = maxc - minc
-    s = np.where(maxc > 0, diff / maxc, 0.0)
-
-    h = np.zeros_like(maxc)
-    mask = diff > 0
-    rc = np.where(mask, (maxc - r) / np.where(mask, diff, 1), 0)
-    gc = np.where(mask, (maxc - g) / np.where(mask, diff, 1), 0)
-    bc = np.where(mask, (maxc - b) / np.where(mask, diff, 1), 0)
-
-    h = np.where(mask & (r == maxc), bc - gc, h)
-    h = np.where(mask & (g == maxc), 2.0 + rc - bc, h)
-    h = np.where(mask & (b == maxc), 4.0 + gc - rc, h)
-    h = (h / 6.0) % 1.0
-
-    return np.column_stack([h, s, v])
+def _image_to_lab(img_float):
+    """Convert full image from RGB [0-1] to CIELAB. Returns (H, W, 3)."""
+    return rgb2lab(img_float)
 
 
-def _block_mean_hsv(img_float, y0, x0, shadow_v):
-    """Mean HSV of a 16x16 block, excluding shadow pixels. Returns None if all shadow."""
-    block = img_float[y0:y0 + VIT_PATCH_SIZE, x0:x0 + VIT_PATCH_SIZE]
+def _shadow_threshold(lab_image):
+    """10th percentile of L* across entire image."""
+    return np.percentile(lab_image[:, :, 0].ravel(), 5)
+
+
+def _block_mean_lab(lab_image, y0, x0, shadow_L):
+    """Mean L*a*b* of a 16x16 block, excluding shadow pixels (L* < shadow_L).
+
+    Returns None if all pixels are shadow.
+    """
+    block = lab_image[y0:y0 + VIT_PATCH_SIZE, x0:x0 + VIT_PATCH_SIZE]
     pixels = block.reshape(-1, 3)
-    hsv = _rgb_to_hsv_vectorized(pixels)
 
-    lit = hsv[:, 2] >= shadow_v
+    lit = pixels[:, 0] >= shadow_L
     if not lit.any():
         return None
 
-    hsv_lit = hsv[lit]
-    hue_angles = hsv_lit[:, 0] * 2 * np.pi
-    mean_hue = (np.arctan2(np.mean(np.sin(hue_angles)), np.mean(np.cos(hue_angles))) / (2 * np.pi)) % 1.0
-    return np.array([mean_hue, hsv_lit[:, 1].mean(), hsv_lit[:, 2].mean()])
+    return pixels[lit].mean(axis=0)
 
 
-def _jittered_box_hsv(img_float, center_px, jitter_px, shadow_v):
-    """Mean HSV of a 16x16 box randomly jittered around center, shadow-excluded."""
+def _jittered_box_lab(lab_image, center_px, jitter_px, shadow_L):
+    """Mean L*a*b* of a 16x16 box randomly jittered around center."""
     angle = random.uniform(0, 2 * math.pi)
     dist = random.uniform(0, jitter_px)
     cy = int(center_px + dist * math.sin(angle))
     cx = int(center_px + dist * math.cos(angle))
 
-    H, W = img_float.shape[:2]
+    H, W = lab_image.shape[:2]
     y0 = max(0, min(cy - VIT_PATCH_SIZE // 2, H - VIT_PATCH_SIZE))
     x0 = max(0, min(cx - VIT_PATCH_SIZE // 2, W - VIT_PATCH_SIZE))
-    return _block_mean_hsv(img_float, y0, x0, shadow_v)
+    return _block_mean_lab(lab_image, y0, x0, shadow_L)
 
 
 def _get_veg_patches(center_px, spray_radius_px):
@@ -119,27 +106,22 @@ def build():
         if color not in ("red", "blue"):
             continue
 
-        img = np.array(row["image"].convert("RGB").resize((PRECROP_SIZE, PRECROP_SIZE)),
-                       dtype=np.float32) / 255.0
-        shadow_v = np.percentile(img.max(axis=-1).ravel(), 10)
+        img_float = np.array(row["image"].convert("RGB").resize((PRECROP_SIZE, PRECROP_SIZE)),
+                             dtype=np.float32) / 255.0
+        lab_image = _image_to_lab(img_float)
+        shadow_L = _shadow_threshold(lab_image)
 
         for vp_r, vp_c in veg_patches:
-            dye_hsv = _jittered_box_hsv(img, center_px, jitter_px, shadow_v)
-            if dye_hsv is None:
+            dye_lab = _jittered_box_lab(lab_image, center_px, jitter_px, shadow_L)
+            if dye_lab is None:
                 continue
 
-            veg_hsv = _block_mean_hsv(img, vp_r * VIT_PATCH_SIZE, vp_c * VIT_PATCH_SIZE, shadow_v)
-            if veg_hsv is None:
+            veg_lab = _block_mean_lab(lab_image, vp_r * VIT_PATCH_SIZE, vp_c * VIT_PATCH_SIZE, shadow_L)
+            if veg_lab is None:
                 continue
 
-            dh = dye_hsv[0] - veg_hsv[0]
-            if dh > 0.5:
-                dh -= 1.0
-            elif dh < -0.5:
-                dh += 1.0
-
-            delta = np.array([dh, dye_hsv[1] - veg_hsv[1], dye_hsv[2] - veg_hsv[2]])
-            results[color]["veg"].append(veg_hsv)
+            delta = dye_lab - veg_lab
+            results[color]["veg"].append(veg_lab)
             results[color]["delta"].append(delta)
 
         if (i + 1) % 50 == 0:
@@ -150,9 +132,9 @@ def build():
         if n > 0:
             deltas = np.array(results[color]["delta"])
             print(f"{color}: {n} pairs — "
-                  f"dh: [{deltas[:,0].min():.3f}, {deltas[:,0].max():.3f}], "
-                  f"ds: [{deltas[:,1].min():.3f}, {deltas[:,1].max():.3f}], "
-                  f"dv: [{deltas[:,2].min():.3f}, {deltas[:,2].max():.3f}]")
+                  f"dL: [{deltas[:,0].min():.1f}, {deltas[:,0].max():.1f}], "
+                  f"da: [{deltas[:,1].min():.1f}, {deltas[:,1].max():.1f}], "
+                  f"db: [{deltas[:,2].min():.1f}, {deltas[:,2].max():.1f}]")
         else:
             print(f"{color}: no pairs")
 
