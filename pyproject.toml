@@ -19,6 +19,7 @@ dependencies = [
     "rasterio",
     "pyproj",
     "matplotlib",
+    "peft",
     "tqdm",
 ]
 
